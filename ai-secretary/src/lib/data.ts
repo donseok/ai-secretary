@@ -35,8 +35,19 @@ const calendarData: Record<string, DaySchedule> = {
     ],
   },
   "2026-04-02": {
-    allDay: [],
-    timed: [],
+    allDay: [
+      { title: "AI비서 작업계속", icon: "🤖" },
+      { title: "관리비 지환이한테 확인", icon: "🏠" },
+      { title: "MES분석", icon: "📊" },
+    ],
+    timed: [
+      { time: "08:00", end: "09:00", title: "실장님, 근배팀장님 연락", duration: "1시간" },
+      { time: "09:00", end: "10:00", title: "정순표 연락", duration: "1시간" },
+      { time: "10:00", end: "11:00", title: "시스템 소개 스케줄 작성", duration: "1시간" },
+      { time: "11:00", end: "12:00", title: "팀회의", duration: "1시간" },
+      { time: "12:00", end: "13:00", title: "점심식사", duration: "1시간" },
+      { time: "16:00", end: "17:00", title: "FMES 회의", duration: "1시간" },
+    ],
   },
   "2026-04-03": {
     allDay: [

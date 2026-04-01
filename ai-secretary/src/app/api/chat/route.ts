@@ -1,6 +1,8 @@
 import { streamText } from "ai";
 import { google } from "@ai-sdk/google";
-import { getCurrentScheduleContext, scheduleEvents, allDayEvents, emails } from "@/lib/data";
+import { emails, getTodayStr } from "@/lib/data";
+import { fetchCalendarEvents } from "@/lib/google-calendar";
+import type { ScheduleEvent, AllDayEvent } from "@/lib/data";
 
 const SYSTEM_PROMPT = `당신은 "김하은"이라는 이름의 AI 비서입니다.
 당신의 역할은 팀장님의 일정과 이메일을 관리하고 브리핑해주는 것입니다.
@@ -22,30 +24,87 @@ const SYSTEM_PROMPT = `당신은 "김하은"이라는 이름의 AI 비서입니�
 - 일반 대화: 짧고 친절하게 응답
 - 모르는 질문: 솔직하게 모른다고 하되, 도울 수 있는 다른 방법 제안`;
 
-function getRuleBasedReply(query: string): string {
+async function getLiveScheduleContext(): Promise<{
+  context: string;
+  timed: ScheduleEvent[];
+  allDay: AllDayEvent[];
+}> {
+  const todayStr = getTodayStr();
+  let timed: ScheduleEvent[] = [];
+  let allDay: AllDayEvent[] = [];
+
+  try {
+    const gcal = await fetchCalendarEvents(todayStr);
+    if (gcal) {
+      timed = gcal.timed;
+      allDay = gcal.allDay;
+    }
+  } catch {
+    // fallback: import from data
+    const { getScheduleForDate } = await import("@/lib/data");
+    const data = getScheduleForDate(todayStr);
+    timed = data.timed;
+    allDay = data.allDay;
+  }
+
+  const now = new Date();
+  const currentMin = now.getHours() * 60 + now.getMinutes();
+  let current = "";
+  let next = "";
+  let remaining = 0;
+
+  for (const evt of timed) {
+    const [sh, sm] = evt.time.split(":").map(Number);
+    const [eh, em] = evt.end.split(":").map(Number);
+    const start = sh * 60 + sm;
+    const end = eh * 60 + em;
+    if (currentMin >= start && currentMin < end) current = evt.title;
+    if (currentMin < start && !next) next = `${evt.time} ${evt.title}`;
+    if (currentMin < end) remaining++;
+  }
+
+  const context = `현재시각: ${now.getHours()}시 ${now.getMinutes()}분
+오늘 시간 일정 (${timed.length}개): ${timed.map(e => `${e.time} ${e.title}`).join(", ")}
+종일 일정 (${allDay.length}개): ${allDay.map(e => e.title).join(", ")}
+${current ? `현재 진행중: ${current}` : "현재 진행중인 일정 없음"}
+${next ? `다음 일정: ${next}` : "남은 일정 없음"}
+남은 일정: ${remaining}개
+
+주요 이메일:
+${emails.map(e => `- [${e.priorityLabel || "일반"}] ${e.sender}: ${e.subject}`).join("\n")}
+`;
+
+  return { context, timed, allDay };
+}
+
+function getRuleBasedReply(
+  query: string,
+  timed: ScheduleEvent[],
+  allDay: AllDayEvent[]
+): string {
   const q = query.toLowerCase();
   const now = new Date();
   const currentMin = now.getHours() * 60 + now.getMinutes();
 
   if (q.includes("일정") || q.includes("스케줄") || q.includes("오늘")) {
-    const remaining = scheduleEvents.filter((e) => {
+    const remaining = timed.filter((e) => {
       const [h, m] = e.end.split(":").map(Number);
       return currentMin < h * 60 + m;
     });
-    let r = `팀장님, 오늘 시간 일정은 총 ${scheduleEvents.length}개입니다.\n\n`;
-    scheduleEvents.forEach((e) => {
+    let r = `팀장님, 오늘 시간 일정은 총 ${timed.length}개입니다.\n\n`;
+    timed.forEach((e) => {
       const [sh, sm] = e.time.split(":").map(Number);
       const [eh, em] = e.end.split(":").map(Number);
       const isPast = currentMin >= eh * 60 + em;
       const isCurrent = currentMin >= sh * 60 + sm && currentMin < eh * 60 + em;
       r += `${isCurrent ? "👉 " : isPast ? "✅ " : "⏳ "}${e.time}-${e.end} ${e.title}\n`;
     });
-    r += `\n종일: ${allDayEvents.map((e) => `${e.icon} ${e.title}`).join(", ")}`;
+    if (allDay.length > 0) r += `\n종일: ${allDay.map((e) => `${e.icon} ${e.title}`).join(", ")}`;
     r += `\n\n남은 일정 ${remaining.length}개입니다.`;
     return r;
   }
   if (q.includes("다음") || q.includes("next")) {
-    const next = scheduleEvents.find((e) => {
+    const next = timed.find((e) => {
       const [h, m] = e.time.split(":").map(Number);
       return currentMin < h * 60 + m;
     });
@@ -57,13 +116,13 @@ function getRuleBasedReply(query: string): string {
   }
   if (q.includes("빈 시간") || q.includes("여유") || q.includes("비어")) {
     const gaps: string[] = [];
-    for (let i = 0; i < scheduleEvents.length - 1; i++) {
-      const [eh, em] = scheduleEvents[i].end.split(":").map(Number);
-      const [sh, sm] = scheduleEvents[i + 1].time.split(":").map(Number);
+    for (let i = 0; i < timed.length - 1; i++) {
+      const [eh, em] = timed[i].end.split(":").map(Number);
+      const [sh, sm] = timed[i + 1].time.split(":").map(Number);
       if (sh * 60 + sm - (eh * 60 + em) >= 30)
-        gaps.push(`⏰ ${scheduleEvents[i].end} ~ ${scheduleEvents[i + 1].time} (${sh * 60 + sm - (eh * 60 + em)}분)`);
+        gaps.push(`⏰ ${timed[i].end} ~ ${timed[i + 1].time} (${sh * 60 + sm - (eh * 60 + em)}분)`);
     }
-    gaps.push(`⏰ ${scheduleEvents[scheduleEvents.length - 1].end} 이후 퇴근까지`);
+    if (timed.length > 0) gaps.push(`⏰ ${timed[timed.length - 1].end} 이후 퇴근까지`);
     return `팀장님, 오늘 빈 시간입니다:\n\n${gaps.join("\n")}`;
   }
   if (q.includes("이메일") || q.includes("메일")) {
@@ -74,7 +133,7 @@ function getRuleBasedReply(query: string): string {
     return r;
   }
   if (q.includes("지금") || q.includes("현재")) {
-    const cur = scheduleEvents.find((e) => {
+    const cur = timed.find((e) => {
       const [sh, sm] = e.time.split(":").map(Number);
       const [eh, em] = e.end.split(":").map(Number);
       return currentMin >= sh * 60 + sm && currentMin < eh * 60 + em;
@@ -88,11 +147,11 @@ function getRuleBasedReply(query: string): string {
 
 export async function POST(req: Request) {
   const body = await req.json();
+  const { context, timed, allDay } = await getLiveScheduleContext();
 
   // AI mode with Gemini
   if (process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
     const messages = body.messages || [{ role: "user", content: body.message }];
-    const context = getCurrentScheduleContext();
     const systemPrompt = SYSTEM_PROMPT.replace("{CONTEXT}", context);
 
     const result = streamText({
@@ -106,6 +165,6 @@ export async function POST(req: Request) {
 
   // Fallback: rule-based
   const userMessage = body.messages?.at(-1)?.content || body.message || "";
-  const reply = getRuleBasedReply(userMessage);
+  const reply = getRuleBasedReply(userMessage, timed, allDay);
   return Response.json({ reply });
 }

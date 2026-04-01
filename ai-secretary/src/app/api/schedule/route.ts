@@ -1,18 +1,23 @@
 import { getScheduleForDate, getTodayStr } from "@/lib/data";
+import { fetchCalendarEvents } from "@/lib/google-calendar";
+
+export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const dateStr = searchParams.get("date") || getTodayStr();
 
-  // Block past dates
-  const today = getTodayStr();
-  if (dateStr < today) {
-    return Response.json(
-      { error: "과거 일정은 조회할 수 없습니다." },
-      { status: 400 }
-    );
+  // Try Google Calendar API first
+  try {
+    const gcalData = await fetchCalendarEvents(dateStr);
+    if (gcalData) {
+      return Response.json({ date: dateStr, source: "google", ...gcalData });
+    }
+  } catch (e) {
+    console.error("Google Calendar API error:", e);
   }
 
+  // Fallback to hardcoded data
   const schedule = getScheduleForDate(dateStr);
-  return Response.json({ date: dateStr, ...schedule });
+  return Response.json({ date: dateStr, source: "local", ...schedule });
 }

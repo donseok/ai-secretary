@@ -2,8 +2,20 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
-import { emails, getTimeGreeting, getTodayStr, addDays, formatDateKR, getScheduleForDate, scheduleEvents, allDayEvents } from "@/lib/data";
+import { getTimeGreeting, getTodayStr, addDays, formatDateKR } from "@/lib/data";
 import type { ScheduleEvent, AllDayEvent } from "@/lib/data";
+
+interface EmailItem {
+  id?: string;
+  type: "important" | "security" | "tech" | "general";
+  emoji: string;
+  sender: string;
+  subject: string;
+  snippet: string;
+  time: string;
+  priority: "high" | "medium" | null;
+  priorityLabel: string | null;
+}
 
 interface ChatMessage { role: "user" | "assistant"; content: string; }
 interface Weather { temp: number | null; tempMax?: number; tempMin?: number; humidity?: number; wind?: number; description: string; icon: string; city: string; }
@@ -12,8 +24,8 @@ export default function Secretary() {
   const [theme, setTheme] = useState<"dark" | "light">("light");
   const [time, setTime] = useState("");
   const [selectedDate, setSelectedDate] = useState(getTodayStr());
-  const [daySchedule, setDaySchedule] = useState<ScheduleEvent[]>(getScheduleForDate(getTodayStr()).timed);
-  const [dayAllDay, setDayAllDay] = useState<AllDayEvent[]>(getScheduleForDate(getTodayStr()).allDay);
+  const [daySchedule, setDaySchedule] = useState<ScheduleEvent[]>([]);
+  const [dayAllDay, setDayAllDay] = useState<AllDayEvent[]>([]);
   const isToday = selectedDate === getTodayStr();
   const isPast = selectedDate < getTodayStr();
   const [date, setDate] = useState("");
@@ -25,6 +37,8 @@ export default function Secretary() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatLoading, setChatLoading] = useState(false);
   const [weather, setWeather] = useState<Weather | null>(null);
+  const [emails, setEmails] = useState<EmailItem[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -41,46 +55,79 @@ export default function Secretary() {
   useEffect(() => { localStorage.removeItem("theme"); }, []);
   useEffect(() => { document.documentElement.setAttribute("data-theme", theme); localStorage.setItem("theme", theme); }, [theme]);
   useEffect(() => { fetch("/api/weather").then(r => r.json()).then(setWeather).catch(() => {}); }, []);
+  useEffect(() => {
+    fetch("/api/emails").then(r => r.json()).then(d => {
+      setEmails(d.emails || []);
+      setUnreadCount(d.unreadCount || 0);
+    }).catch(() => {});
+  }, []);
+
+  // Fetch schedule from API
+  const fetchSchedule = useCallback(async (dateStr: string) => {
+    try {
+      const res = await fetch(`/api/schedule?date=${dateStr}`);
+      if (res.ok) {
+        const data = await res.json();
+        setDaySchedule(data.timed || []);
+        setDayAllDay(data.allDay || []);
+      }
+    } catch {
+      setDaySchedule([]);
+      setDayAllDay([]);
+    }
+  }, []);
+
+  useEffect(() => { fetchSchedule(selectedDate); }, [selectedDate, fetchSchedule]);
 
   // Date navigation
   function changeDate(offset: number) {
     const next = addDays(selectedDate, offset);
-    if (next < getTodayStr()) return; // block past
+    if (next < getTodayStr()) return;
     setSelectedDate(next);
-    const data = getScheduleForDate(next);
-    setDaySchedule(data.timed);
-    setDayAllDay(data.allDay);
   }
 
   function goToDate(dateStr: string) {
     if (dateStr < getTodayStr()) return;
     setSelectedDate(dateStr);
-    const data = getScheduleForDate(dateStr);
-    setDaySchedule(data.timed);
-    setDayAllDay(data.allDay);
   }
+
+  // Briefing uses today's schedule from state (when viewing today)
+  const [todaySchedule, setTodaySchedule] = useState<ScheduleEvent[]>([]);
+  const [todayAllDay, setTodayAllDay] = useState<AllDayEvent[]>([]);
+
+  // Fetch today's schedule once for briefing
+  useEffect(() => {
+    fetch(`/api/schedule?date=${getTodayStr()}`)
+      .then(r => r.json())
+      .then(d => { setTodaySchedule(d.timed || []); setTodayAllDay(d.allDay || []); })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     function gen() {
       setGreeting(getTimeGreeting());
       const n = new Date(), cm = n.getHours() * 60 + n.getMinutes();
       let cur = null, nxt = null;
-      for (const e of scheduleEvents) {
+      for (const e of todaySchedule) {
         const [sh, sm] = e.time.split(":").map(Number), [eh, em] = e.end.split(":").map(Number);
         if (cm >= sh * 60 + sm && cm < eh * 60 + em) cur = e;
         if (cm < sh * 60 + sm && !nxt) nxt = e;
       }
-      const rem = scheduleEvents.filter(e => { const [eh, em] = e.end.split(":").map(Number); return cm < eh * 60 + em; }).length;
+      const rem = todaySchedule.filter(e => { const [eh, em] = e.end.split(":").map(Number); return cm < eh * 60 + em; }).length;
       let t = "";
       if (cur) { t += `지금은 <strong>${cur.title}</strong> 시간입니다. `; if (nxt) t += `다음은 <strong>${nxt.time}</strong>에 <strong>${nxt.title}</strong>이 예정되어 있어요. `; }
       else if (nxt) { const [sh, sm] = nxt.time.split(":").map(Number), diff = sh * 60 + sm - cm; t += diff <= 30 ? `<strong>${diff}분 후</strong> <strong>${nxt.title}</strong>이 시작됩니다!` : `다음 일정은 <strong>${nxt.time}</strong>에 <strong>${nxt.title}</strong>입니다. `; }
       else t += "오늘 남은 일정이 모두 완료되었습니다! 🎉 ";
-      t += `<br/>오늘 <strong>${scheduleEvents.length}개</strong> 시간 일정 중 <strong>${rem}개</strong> 남음, 종일 할 일 <strong>${allDayEvents.length}건</strong>.`;
-      t += ` 📧 <strong>Supabase 보안 알림</strong> 확인 필요, Google 보안 <strong>2건</strong>.`;
+      t += `<br/>오늘 <strong>${todaySchedule.length}개</strong> 시간 일정 중 <strong>${rem}개</strong> 남음, 종일 할 일 <strong>${todayAllDay.length}건</strong>.`;
+      const importantEmails = emails.filter(e => e.priority === "high");
+      const securityEmails = emails.filter(e => e.type === "security");
+      if (importantEmails.length > 0) t += ` 📧 <strong>${importantEmails[0].sender} ${importantEmails[0].subject.slice(0, 20)}</strong> 확인 필요`;
+      if (securityEmails.length > 0) t += `, Google 보안 <strong>${securityEmails.length}건</strong>.`;
+      else t += ".";
       setBriefing(t);
     }
     gen(); const id = setInterval(gen, 300000); return () => clearInterval(id);
-  }, []);
+  }, [todaySchedule, todayAllDay]);
 
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [chatMessages]);
   useEffect(() => { if (chatOpen) inputRef.current?.focus(); }, [chatOpen]);
@@ -115,7 +162,7 @@ export default function Secretary() {
     setChatLoading(false);
   }, [chatInput, chatLoading, chatMessages]);
 
-  function getStatus(evt: (typeof scheduleEvents)[0]) {
+  function getStatus(evt: ScheduleEvent) {
     const cm = new Date().getHours() * 60 + new Date().getMinutes();
     const [sh, sm] = evt.time.split(":").map(Number), [eh, em] = evt.end.split(":").map(Number);
     if (cm >= sh * 60 + sm && cm < eh * 60 + em) return "current";
@@ -222,8 +269,8 @@ export default function Secretary() {
           {[
             { icon: "📅", label: "시간 일정", value: daySchedule.length, unit: "건", color: "var(--accent)", bg: "var(--accent-soft)" },
             { icon: "📌", label: "종일 할 일", value: dayAllDay.length, unit: "건", color: "var(--green)", bg: "var(--green-soft)" },
-            { icon: "📧", label: "안 읽은 메일", value: 10, unit: "통", color: "var(--orange)", bg: "var(--orange-soft)" },
-            { icon: "🚨", label: "중요 알림", value: 2, unit: "건", color: "var(--red)", bg: "var(--red-soft)" },
+            { icon: "📧", label: "안 읽은 메일", value: unreadCount, unit: "통", color: "var(--orange)", bg: "var(--orange-soft)" },
+            { icon: "🚨", label: "중요 알림", value: emails.filter(e => e.priority === "high" || e.priority === "medium").length, unit: "건", color: "var(--red)", bg: "var(--red-soft)" },
           ].map(c => (
             <div key={c.label} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 20, padding: "28px 24px", boxShadow: "var(--shadow)", transition: "transform 0.2s", cursor: "default" }}>
               <div style={{ width: 44, height: 44, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, background: c.bg, marginBottom: 16 }}>{c.icon}</div>
@@ -263,12 +310,9 @@ export default function Secretary() {
                 const dayDate = new Date(d + "T00:00:00+09:00");
                 const dayNames = ["일", "월", "화", "수", "목", "금", "토"];
                 const label = offset === 0 ? "오늘" : offset === 1 ? "내일" : `${dayDate.getDate()}일(${dayNames[dayDate.getDay()]})`;
-                const data = getScheduleForDate(d);
-                const hasEvents = data.timed.length > 0 || data.allDay.length > 0;
                 return (
                   <button key={d} onClick={() => goToDate(d)} style={{ padding: "6px 14px", borderRadius: 8, border: `1px solid ${isSelected ? "var(--accent)" : "var(--border)"}`, background: isSelected ? "var(--accent-soft)" : "var(--surface-3)", color: isSelected ? "var(--accent)" : "var(--text-secondary)", fontSize: 12, fontWeight: isSelected ? 800 : 600, cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap", transition: "all 0.2s", position: "relative" }}>
                     {label}
-                    {hasEvents && <span style={{ position: "absolute", top: 2, right: 2, width: 5, height: 5, borderRadius: "50%", background: isSelected ? "var(--accent)" : "var(--orange)" }} />}
                   </button>
                 );
               })}
