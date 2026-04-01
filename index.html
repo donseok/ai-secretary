@@ -1,1289 +1,1215 @@
 <!DOCTYPE html>
 <html lang="ko">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>동국제강 원료기획팀 바이브코딩 실습 가이드</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap"
-    rel="stylesheet">
+  <title>AI 비서 - 오늘의 브리핑</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
     :root {
-      --navy: #1B2A4A;
-      --navy-light: #2C3E6B;
-      --orange: #E67E22;
-      --orange-light: #F5B041;
-      --bg: #F4F6F9;
-      --white: #FFFFFF;
-      --gray-50: #F9FAFB;
-      --gray-100: #F3F4F6;
-      --gray-200: #E5E7EB;
-      --gray-300: #D1D5DB;
-      --gray-400: #9CA3AF;
-      --gray-500: #6B7280;
-      --gray-600: #4B5563;
-      --gray-700: #374151;
-      --gray-800: #1F2937;
-      --green: #10B981;
-      --green-bg: #ECFDF5;
-      --blue: #3B82F6;
-      --blue-bg: #EFF6FF;
-      --red: #EF4444;
-      --red-bg: #FEF2F2;
-      --purple: #8B5CF6;
-      --purple-bg: #F5F3FF;
-      --amber-bg: #FFFBEB;
-      --amber: #F59E0B;
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface-2: #242836;
+      --surface-3: #2e3344;
+      --border: #343a4d;
+      --text: #e8eaed;
+      --text-secondary: #9aa0b4;
+      --text-muted: #6b7280;
+      --accent: #6c8cff;
+      --accent-soft: rgba(108, 140, 255, 0.12);
+      --green: #34d399;
+      --green-soft: rgba(52, 211, 153, 0.12);
+      --orange: #f59e0b;
+      --orange-soft: rgba(245, 158, 11, 0.12);
+      --red: #f87171;
+      --red-soft: rgba(248, 113, 113, 0.12);
+      --pink: #f472b6;
+      --pink-soft: rgba(244, 114, 182, 0.12);
+      --radius: 16px;
+      --radius-sm: 10px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.3);
+      --status-bg: rgba(0,0,0,0.6);
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    [data-theme="light"] {
+      --bg: #f0f2f5;
+      --surface: #ffffff;
+      --surface-2: #f7f8fa;
+      --surface-3: #eef0f4;
+      --border: #dde1e8;
+      --text: #1a1d27;
+      --text-secondary: #4b5563;
+      --text-muted: #9ca3af;
+      --accent: #4f6ef7;
+      --accent-soft: rgba(79, 110, 247, 0.1);
+      --green: #059669;
+      --green-soft: rgba(5, 150, 105, 0.1);
+      --orange: #d97706;
+      --orange-soft: rgba(217, 119, 6, 0.1);
+      --red: #dc2626;
+      --red-soft: rgba(220, 38, 38, 0.1);
+      --pink: #db2777;
+      --pink-soft: rgba(219, 39, 119, 0.1);
+      --shadow: 0 1px 4px rgba(0,0,0,0.08);
+      --status-bg: rgba(255,255,255,0.85);
     }
 
     body {
-      font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: 'Noto Sans KR', -apple-system, sans-serif;
       background: var(--bg);
-      color: var(--gray-800);
-      line-height: 1.7;
-      font-size: 15px;
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
     }
 
-    /* ── HEADER ── */
-    .main-header {
-      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
-      color: white;
-      padding: 48px 40px 40px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .main-header::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      right: -10%;
-      width: 400px;
-      height: 400px;
-      background: radial-gradient(circle, rgba(230, 126, 34, 0.15) 0%, transparent 70%);
-      border-radius: 50%;
-    }
-
-    .main-header::after {
-      content: '';
-      position: absolute;
-      bottom: -30%;
-      left: 20%;
-      width: 300px;
-      height: 300px;
-      background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
-      border-radius: 50%;
-    }
-
-    .header-inner {
-      max-width: 900px;
-      margin: 0 auto;
-      position: relative;
-      z-index: 1;
-    }
-
-    .header-badge {
-      display: inline-block;
-      background: var(--orange);
-      color: white;
-      padding: 4px 14px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      margin-bottom: 16px;
-    }
-
-    .main-header h1 {
-      font-size: 32px;
-      font-weight: 800;
-      margin-bottom: 8px;
-      letter-spacing: -0.5px;
-    }
-
-    .main-header .subtitle {
-      font-size: 18px;
-      font-weight: 300;
-      opacity: 0.85;
-      margin-bottom: 24px;
-    }
-
-    .header-info {
-      display: flex;
-      gap: 24px;
-      flex-wrap: wrap;
-      font-size: 13px;
-      opacity: 0.7;
-    }
-
-    .header-info span {
+    /* Header */
+    .header {
+      padding: 20px 32px;
       display: flex;
       align-items: center;
-      gap: 6px;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(20px);
+      box-shadow: var(--shadow);
     }
 
-    /* ── CONTENT WRAPPER ── */
-    .content {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 32px 24px 60px;
-    }
-
-    /* ── CONCEPT BOX ── */
-    .concept-box {
-      background: white;
-      border-radius: 16px;
-      padding: 28px 32px;
-      margin-bottom: 32px;
-      border: 1px solid var(--gray-200);
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-    }
-
-    .concept-box h2 {
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--navy);
-      margin-bottom: 14px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .concept-box p {
-      color: var(--gray-600);
-      font-size: 14.5px;
-      line-height: 1.8;
-    }
-
-    .concept-box .analogy {
-      background: var(--blue-bg);
-      border-left: 3px solid var(--blue);
-      padding: 12px 16px;
-      border-radius: 0 8px 8px 0;
-      margin-top: 14px;
-      font-size: 14px;
-      color: var(--gray-700);
-    }
-
-    /* ── PREP SECTION ── */
-    .prep-section {
-      background: white;
-      border-radius: 16px;
-      padding: 28px 32px;
-      margin-bottom: 40px;
-      border: 1px solid var(--gray-200);
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-    }
-
-    .prep-section h2 {
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--navy);
-      margin-bottom: 18px;
-    }
-
-    .prep-steps {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .prep-step {
-      display: flex;
-      align-items: flex-start;
-      gap: 14px;
-      padding: 14px 18px;
-      background: var(--gray-50);
-      border-radius: 10px;
-      border: 1px solid var(--gray-100);
-    }
-
-    .prep-num {
-      background: var(--navy);
-      color: white;
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 13px;
-      font-weight: 700;
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
-
-    .prep-step-text {
-      font-size: 14.5px;
-      color: var(--gray-700);
-    }
-
-    .prep-step-text strong {
-      color: var(--gray-800);
-    }
-
-    /* ── STEP CARD ── */
-    .step-card {
-      background: white;
-      border-radius: 16px;
-      margin-bottom: 36px;
-      border: 1px solid var(--gray-200);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-      overflow: hidden;
-    }
-
-    .step-header {
-      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
-      color: white;
-      padding: 22px 28px;
+    .header-actions {
       display: flex;
       align-items: center;
       gap: 16px;
     }
 
-    .step-number {
-      background: var(--orange);
-      color: white;
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      font-weight: 800;
+    /* Theme Toggle */
+    .theme-toggle {
+      width: 52px;
+      height: 28px;
+      border-radius: 14px;
+      background: var(--surface-3);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      position: relative;
+      transition: all 0.3s ease;
       flex-shrink: 0;
     }
 
-    .step-title-area h2 {
-      font-size: 19px;
-      font-weight: 700;
-      margin-bottom: 2px;
+    .theme-toggle::before {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--accent);
+      transition: all 0.3s ease;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
     }
 
-    .step-title-area .step-subtitle {
+    .theme-toggle .toggle-icon {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
       font-size: 13px;
-      opacity: 0.75;
-      font-weight: 300;
+      line-height: 1;
+      transition: opacity 0.3s;
     }
 
-    .step-time {
-      margin-left: auto;
-      background: rgba(255, 255, 255, 0.15);
-      padding: 5px 14px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
+    .toggle-icon.moon { right: 6px; opacity: 1; }
+    .toggle-icon.sun { left: 6px; opacity: 0; }
+
+    [data-theme="light"] .theme-toggle::before {
+      left: 27px;
+    }
+
+    [data-theme="light"] .toggle-icon.moon { opacity: 0; }
+    [data-theme="light"] .toggle-icon.sun { opacity: 1; }
+
+    /* Voice Button */
+    .voice-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 13px;
+      font-family: inherit;
+      transition: all 0.2s;
       white-space: nowrap;
     }
 
-    .step-body {
-      padding: 28px;
+    .voice-btn:hover {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      color: var(--accent);
     }
 
-    /* ── PROMPT BOX ── */
-    .prompt-section {
-      margin-bottom: 24px;
+    .voice-btn.speaking {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      color: var(--accent);
     }
 
-    .prompt-label {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--orange);
-      color: white;
-      padding: 5px 14px;
-      border-radius: 6px 6px 0 0;
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    .prompt-box {
-      background: var(--gray-800);
-      color: #E5E7EB;
-      padding: 24px;
-      border-radius: 0 10px 10px 10px;
-      font-size: 13.5px;
-      line-height: 1.9;
-      white-space: pre-wrap;
-      word-break: break-word;
-      position: relative;
-      font-family: 'Noto Sans KR', monospace;
-    }
-
-    .prompt-box .copy-btn {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: rgba(255, 255, 255, 0.1);
-      color: rgba(255, 255, 255, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      padding: 5px 12px;
-      border-radius: 6px;
-      font-size: 11px;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: 'Noto Sans KR', sans-serif;
-    }
-
-    .prompt-box .copy-btn:hover {
-      background: rgba(255, 255, 255, 0.2);
-      color: white;
-    }
-
-    /* ── CHECK LIST ── */
-    .check-section {
-      background: var(--green-bg);
-      border: 1px solid #A7F3D0;
-      border-radius: 10px;
-      padding: 18px 22px;
-      margin-bottom: 20px;
-    }
-
-    .check-section h4 {
-      font-size: 14px;
-      font-weight: 700;
-      color: #065F46;
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .check-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
-      padding: 5px 0;
-      font-size: 13.5px;
-      color: #065F46;
-    }
-
-    .check-item::before {
-      content: '☐';
+    .voice-btn .btn-icon {
       font-size: 16px;
-      flex-shrink: 0;
-      margin-top: -1px;
+      line-height: 1;
     }
 
-    /* ── TEACHER TIP ── */
-    .teacher-tip {
-      background: var(--amber-bg);
-      border: 1px solid #FDE68A;
-      border-radius: 10px;
-      padding: 16px 20px;
-      margin-bottom: 20px;
+    .voice-btn.speaking .btn-icon {
+      animation: pulse 1s ease-in-out infinite;
     }
 
-    .teacher-tip h4 {
-      font-size: 13px;
-      font-weight: 700;
-      color: #92400E;
-      margin-bottom: 6px;
+    @media (max-width: 900px) {
+      .voice-btn span.btn-label { display: none; }
+      .header { padding: 16px; }
     }
 
-    .teacher-tip p {
-      font-size: 13.5px;
-      color: #78350F;
-      line-height: 1.7;
-    }
-
-    /* ── DATA BOX ── */
-    .data-section {
-      margin-bottom: 20px;
-    }
-
-    .data-label {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--purple);
-      color: white;
-      padding: 5px 14px;
-      border-radius: 6px 6px 0 0;
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    .data-box {
-      background: var(--gray-50);
-      border: 1px solid var(--gray-200);
-      padding: 18px 20px;
-      border-radius: 0 10px 10px 10px;
-      font-family: 'Courier New', monospace;
-      font-size: 12.5px;
-      line-height: 1.8;
-      white-space: pre-wrap;
-      word-break: break-all;
-      color: var(--gray-700);
-      position: relative;
-    }
-
-    .data-box .copy-btn {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: var(--gray-200);
-      color: var(--gray-600);
-      border: 1px solid var(--gray-300);
-      padding: 5px 12px;
-      border-radius: 6px;
-      font-size: 11px;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: 'Noto Sans KR', sans-serif;
-    }
-
-    .data-box .copy-btn:hover {
-      background: var(--gray-300);
-      color: var(--gray-800);
-    }
-
-    /* ── TROUBLESHOOT ── */
-    .trouble-section {
-      background: white;
-      border-radius: 16px;
-      padding: 28px 32px;
-      margin-bottom: 36px;
-      border: 1px solid var(--gray-200);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-    }
-
-    .trouble-section h2 {
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--red);
-      margin-bottom: 20px;
+    .header-left {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 12px;
     }
 
-    .trouble-item {
-      background: var(--gray-50);
-      border: 1px solid var(--gray-200);
+    .header-logo {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--accent), #a78bfa);
       border-radius: 10px;
-      padding: 16px 20px;
-      margin-bottom: 12px;
-    }
-
-    .trouble-item h4 {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--gray-800);
-      margin-bottom: 8px;
-    }
-
-    .trouble-item .trouble-prompt {
-      background: var(--gray-800);
-      color: #E5E7EB;
-      padding: 12px 16px;
-      border-radius: 8px;
-      font-size: 13px;
-      line-height: 1.7;
-      position: relative;
-    }
-
-    .trouble-item .trouble-prompt .copy-btn {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      background: rgba(255, 255, 255, 0.1);
-      color: rgba(255, 255, 255, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      padding: 4px 10px;
-      border-radius: 5px;
-      font-size: 11px;
-      cursor: pointer;
-      font-family: 'Noto Sans KR', sans-serif;
-    }
-
-    /* ── BONUS ── */
-    .bonus-section {
-      background: linear-gradient(135deg, var(--orange) 0%, #D35400 100%);
-      border-radius: 16px;
-      padding: 28px 32px;
-      margin-bottom: 36px;
-      color: white;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .bonus-section::before {
-      content: '⭐';
-      position: absolute;
-      top: -10px;
-      right: 20px;
-      font-size: 80px;
-      opacity: 0.15;
-    }
-
-    .bonus-section h2 {
-      font-size: 20px;
-      font-weight: 700;
-      margin-bottom: 10px;
-    }
-
-    .bonus-section p {
-      font-size: 14px;
-      opacity: 0.9;
-      margin-bottom: 18px;
-    }
-
-    .bonus-prompt-box {
-      background: rgba(0, 0, 0, 0.25);
-      padding: 24px;
-      border-radius: 10px;
-      font-size: 13px;
-      line-height: 1.9;
-      white-space: pre-wrap;
-      word-break: break-word;
-      position: relative;
-    }
-
-    .bonus-prompt-box .copy-btn {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: rgba(255, 255, 255, 0.15);
-      color: rgba(255, 255, 255, 0.7);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      padding: 5px 12px;
-      border-radius: 6px;
-      font-size: 11px;
-      cursor: pointer;
-      font-family: 'Noto Sans KR', sans-serif;
-    }
-
-    /* ── GLOSSARY ── */
-    .glossary-section {
-      background: white;
-      border-radius: 16px;
-      padding: 28px 32px;
-      margin-bottom: 36px;
-      border: 1px solid var(--gray-200);
-    }
-
-    .glossary-section h2 {
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--navy);
-      margin-bottom: 18px;
-    }
-
-    .glossary-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    .glossary-item {
-      padding: 12px 16px;
-      background: var(--gray-50);
-      border-radius: 8px;
-      border: 1px solid var(--gray-100);
-    }
-
-    .glossary-term {
-      font-weight: 700;
-      color: var(--navy);
-      font-size: 13.5px;
-      margin-bottom: 3px;
-    }
-
-    .glossary-def {
-      font-size: 12.5px;
-      color: var(--gray-500);
-      line-height: 1.6;
-    }
-
-    /* ── FOOTER ── */
-    .main-footer {
-      text-align: center;
-      padding: 32px;
-      color: var(--gray-400);
-      font-size: 13px;
-      border-top: 1px solid var(--gray-200);
-      background: white;
-    }
-
-    /* ── DIVIDER ── */
-    .section-divider {
       display: flex;
       align-items: center;
-      gap: 16px;
-      margin: 40px 0 28px;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--gray-400);
-      text-transform: uppercase;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .header-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    .header-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 1px;
+    }
+
+    .header-time {
+      text-align: right;
+    }
+
+    .current-time {
+      font-size: 28px;
+      font-weight: 300;
+      font-variant-numeric: tabular-nums;
       letter-spacing: 1px;
     }
 
-    .section-divider::before,
-    .section-divider::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--gray-200);
-    }
-
-    /* ── SUB-PROMPT ── */
-    .sub-prompt {
-      margin-top: 20px;
-      padding-top: 20px;
-      border-top: 1px dashed var(--gray-200);
-    }
-
-    .sub-prompt-label {
+    .current-date {
       font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    /* Main Layout */
+    .main {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 28px;
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 28px;
+    }
+
+    /* Secretary Card */
+    .secretary-card {
+      position: sticky;
+      top: 100px;
+      height: fit-content;
+    }
+
+    .secretary-profile {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .secretary-image-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 3/3.2;
+      overflow: hidden;
+    }
+
+    .secretary-image-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
+    }
+
+    .secretary-image-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 120px;
+      background: linear-gradient(transparent, var(--surface));
+    }
+
+    .secretary-status {
+      position: absolute;
+      bottom: 16px;
+      left: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--status-bg);
+      backdrop-filter: blur(12px);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .secretary-info {
+      padding: 20px;
+    }
+
+    .secretary-name {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    .secretary-role {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    /* Speech Bubble */
+    .speech-bubble {
+      margin-top: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      position: relative;
+      box-shadow: var(--shadow);
+    }
+
+    .speech-bubble::before {
+      content: '';
+      position: absolute;
+      top: -8px;
+      left: 30px;
+      width: 16px;
+      height: 16px;
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      border-top: 1px solid var(--border);
+      transform: rotate(45deg);
+    }
+
+    .speech-greeting {
+      font-size: 15px;
       font-weight: 600;
-      color: var(--gray-500);
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+
+    .speech-text {
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--text-secondary);
+    }
+
+    .speech-text strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .speech-typing {
+      display: inline-flex;
+      gap: 4px;
+      margin-left: 4px;
+      vertical-align: middle;
+    }
+
+    .speech-typing span {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: typing 1.4s ease-in-out infinite;
+    }
+
+    .speech-typing span:nth-child(2) { animation-delay: 0.2s; }
+    .speech-typing span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes typing {
+      0%, 100% { opacity: 0.3; transform: translateY(0); }
+      50% { opacity: 1; transform: translateY(-3px); }
+    }
+
+    /* Right Panel */
+    .right-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    /* Summary Cards Row */
+    .summary-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .summary-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .summary-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .summary-value {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -1px;
+    }
+
+    .summary-detail {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    .summary-card.schedule .summary-value { color: var(--accent); }
+    .summary-card.email .summary-value { color: var(--orange); }
+    .summary-card.todo .summary-value { color: var(--green); }
+
+    /* Section Title */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      letter-spacing: -0.3px;
+    }
+
+    .section-title .icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .section-badge {
+      font-size: 12px;
+      color: var(--text-muted);
+      background: var(--surface-3);
+      padding: 4px 10px;
+      border-radius: 12px;
+    }
+
+    /* Timeline */
+    .timeline {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .timeline-allday {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-2);
+    }
+
+    .allday-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
       margin-bottom: 10px;
     }
 
-    /* ── PRINT ── */
-    @media print {
-      body {
-        font-size: 11px;
-        background: white;
-      }
+    .allday-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
 
-      .main-header {
-        padding: 24px 20px;
-      }
+    .allday-chip {
+      font-size: 13px;
+      padding: 5px 12px;
+      border-radius: 8px;
+      background: var(--surface-3);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
 
-      .content {
+    .timeline-body {
+      padding: 8px 0;
+    }
+
+    .timeline-item {
+      display: grid;
+      grid-template-columns: 80px 4px 1fr;
+      gap: 16px;
+      padding: 12px 20px;
+      align-items: start;
+      transition: background 0.2s;
+      cursor: default;
+    }
+
+    .timeline-item:hover {
+      background: var(--surface-2);
+    }
+
+    .timeline-item.current {
+      background: var(--accent-soft);
+    }
+
+    .timeline-item.past {
+      opacity: 0.45;
+    }
+
+    .timeline-time {
+      font-size: 14px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+      padding-top: 2px;
+    }
+
+    .timeline-dot-line {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 6px;
+    }
+
+    .timeline-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--surface-3);
+      border: 2px solid var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .timeline-item.current .timeline-dot {
+      background: var(--accent);
+      border-color: var(--accent);
+      box-shadow: 0 0 12px rgba(108, 140, 255, 0.4);
+    }
+
+    .timeline-line {
+      width: 2px;
+      flex: 1;
+      background: var(--border);
+      margin-top: 4px;
+    }
+
+    .timeline-content {
+      padding-top: 0;
+    }
+
+    .timeline-title {
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -0.2px;
+    }
+
+    .timeline-duration {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .timeline-item.current .timeline-title {
+      color: var(--accent);
+    }
+
+    .current-badge {
+      display: inline-block;
+      font-size: 11px;
+      background: var(--accent);
+      color: white;
+      padding: 2px 8px;
+      border-radius: 6px;
+      margin-left: 8px;
+      font-weight: 500;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    /* Email Section */
+    .email-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .email-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px 20px;
+      display: grid;
+      grid-template-columns: 40px 1fr auto;
+      gap: 14px;
+      align-items: center;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+
+    .email-card:hover {
+      background: var(--surface-2);
+      border-color: var(--accent);
+      transform: translateX(4px);
+    }
+
+    .email-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .email-icon.important { background: var(--red-soft); }
+    .email-icon.security { background: var(--orange-soft); }
+    .email-icon.tech { background: var(--accent-soft); }
+    .email-icon.social { background: var(--pink-soft); }
+
+    .email-sender {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 3px;
+    }
+
+    .email-subject {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: -0.2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .email-snippet {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .email-time {
+      font-size: 12px;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .email-priority {
+      display: inline-block;
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    .priority-high {
+      background: var(--red-soft);
+      color: var(--red);
+    }
+
+    .priority-medium {
+      background: var(--orange-soft);
+      color: var(--orange);
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 40px 28px;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .main {
+        grid-template-columns: 1fr;
         padding: 16px;
       }
-
-      .step-card,
-      .concept-box,
-      .prep-section,
-      .trouble-section,
-      .bonus-section,
-      .glossary-section {
-        break-inside: avoid;
-        page-break-inside: avoid;
-      }
-
-      .prompt-box,
-      .data-box,
-      .trouble-prompt,
-      .bonus-prompt-box {
-        font-size: 10px;
-      }
-
-      .copy-btn {
-        display: none !important;
-      }
+      .secretary-card { position: static; }
+      .secretary-image-wrap { aspect-ratio: 3/2; }
+      .summary-row { grid-template-columns: 1fr; }
     }
 
-    @media (max-width: 640px) {
-      .main-header {
-        padding: 28px 20px;
-      }
-
-      .main-header h1 {
-        font-size: 24px;
-      }
-
-      .content {
-        padding: 20px 16px 40px;
-      }
-
-      .step-body {
-        padding: 20px;
-      }
-
-      .glossary-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .step-header {
-        flex-wrap: wrap;
-      }
-
-      .step-time {
-        margin-left: 0;
-        margin-top: 4px;
-      }
+    /* Animations */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
+
+    .animate-in {
+      animation: fadeInUp 0.5s ease-out both;
+    }
+
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+    .delay-4 { animation-delay: 0.4s; }
+    .delay-5 { animation-delay: 0.5s; }
   </style>
 </head>
-
 <body>
 
-  <!-- ═══════ HEADER ═══════ -->
-  <header class="main-header">
-    <div class="header-inner">
-      <div class="header-badge">HANDS-ON WORKSHOP</div>
-      <h1>🏗️ 바이브코딩 실습 가이드</h1>
-      <div class="subtitle">AI에게 부탁해서 우리 팀 대시보드 만들기</div>
-      <div class="header-info">
-        <span>📌 동국제강 원료기획팀</span>
-        <span>⏱️ 총 약 90분</span>
-        <span>🎯 6단계 실습</span>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <div class="header-logo">&#x1f4cb;</div>
+      <div>
+        <div class="header-title">AI Secretary</div>
+        <div class="header-subtitle">Personal Briefing System</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="voice-btn" id="voiceBtn" onclick="toggleVoice()">
+        <span class="btn-icon" id="voiceIcon">&#x1f50a;</span>
+        <span class="btn-label" id="voiceLabel">음성 브리핑</span>
+      </button>
+      <div class="theme-toggle" id="themeToggle" onclick="toggleTheme()">
+        <span class="toggle-icon sun">&#x2600;</span>
+        <span class="toggle-icon moon">&#x1f319;</span>
+      </div>
+      <div class="header-time">
+        <div class="current-time" id="currentTime">--:--:--</div>
+        <div class="current-date" id="currentDate">----년 --월 --일</div>
       </div>
     </div>
   </header>
 
-  <div class="content">
+  <!-- Main -->
+  <main class="main">
 
-    <!-- ═══════ INTRO ═══════ -->
-    <div class="concept-box">
-      <h2>💡 오늘의 방식</h2>
-      <p>처음부터 완벽하게 만들지 않습니다.<br>
-        <strong>간단하게 시작 → 하나씩 기능 추가 → 점점 완성</strong>하는 방식으로 진행합니다.
-      </p>
-      <div class="analogy">
-        🏠 <strong>비유하면:</strong> 집을 지을 때 <strong>골조 세우기 → 인테리어 → 가전 배치</strong> 순서와 같아요!
-      </div>
-    </div>
-
-    <!-- ═══════ 준비 ═══════ -->
-    <div class="prep-section">
-      <h2>🔧 시작 전 준비 확인</h2>
-      <div class="prep-steps">
-        <div class="prep-step">
-          <div class="prep-num">1</div>
-          <div class="prep-step-text"><strong>Antigravity 실행</strong> 구글계정으로 접속 </div>
-        </div>
-        <div class="prep-step">
-          <div class="prep-num">2</div>
-          <div class="prep-step-text">채팅창에 프롬프트를 <strong>복사-붙여넣기</strong>하면 끝!</div>
-        </div>
-        <div class="prep-step">
-          <div class="prep-num">3</div>
-          <div class="prep-step-text">AI가 만들어준 코드를 <strong>내 웹 브라우저에서</strong>바로 확인</div>
-        </div>
-      </div>
-    </div>
-
-
-    <!-- ═══════════════════════════════════════ -->
-    <!-- STEP 1 -->
-    <!-- ═══════════════════════════════════════ -->
-    <div class="section-divider">실습 시작</div>
-
-    <div class="step-card">
-      <div class="step-header">
-        <div class="step-number">1</div>
-        <div class="step-title-area">
-          <h2>뼈대 만들기</h2>
-          <div class="step-subtitle">"일단 화면을 띄워보자"</div>
-        </div>
-        <div class="step-time">⏱️ 10분</div>
-      </div>
-      <div class="step-body">
-
-        <div class="prompt-section">
-          <div class="prompt-label">📋 AI에게 보낼 프롬프트</div>
-          <div class="prompt-box" id="prompt1">동국제강 원료기획팀에서 사용할 업무 대시보드 웹 페이지를 만들어줘.
-            하나의 HTML 파일로 만들어줘.
-
-            상단에 진한 남색 배경의 헤더를 넣고, 왼쪽에 "DK 동국제강" 로고 텍스트, 오른쪽에 오늘 날짜와 "동국제강 원료기획팀 | 이돈석 팀장님" 텍스트를 넣어줘.
-
-            헤더 아래에 탭 메뉴 5개를 만들어줘:
-            - 부재료실적 모니터링
-            - 등급별현황/수입관리
-            - 거래처 관리
-            - 공지사항
-            - 사용자관리
-
-            탭을 클릭하면 해당 내용이 보이고, 다른 탭 내용은 숨겨지게 해줘.
-            지금은 각 탭에 "여기에 OO 내용이 들어갑니다"라고만 표시해줘.
-
-            전체 배경은 밝은 회색(#F4F6F9), 헤더는 진한 남색(#1B2A4A), 포인트 색상은 오렌지(#E67E22)로 해줘.<button class="copy-btn"
-              onclick="copyPrompt('prompt1')">복사</button></div>
-        </div>
-
-        <div class="check-section">
-          <h4>✅ 확인 체크리스트</h4>
-          <div class="check-item">화면에 네이비색 헤더가 보이나요?</div>
-          <div class="check-item">5개 탭을 클릭하면 내용이 바뀌나요?</div>
-        </div>
-
-        <div class="teacher-tip">
-          <h4>💬 강사 한마디</h4>
-          <p>지금 결과물은 <strong>HTML</strong>(구조) + <strong>CSS</strong>(디자인) + <strong>JavaScript</strong>(탭 전환 동작)의
-            조합입니다. AI가 세 가지를 한번에 만들어준 거예요!</p>
-        </div>
-
-      </div>
-    </div>
-
-
-    <!-- ═══════════════════════════════════════ -->
-    <!-- STEP 2 -->
-    <!-- ═══════════════════════════════════════ -->
-    <div class="step-card">
-      <div class="step-header">
-        <div class="step-number">2</div>
-        <div class="step-title-area">
-          <h2>숫자 카드 넣기</h2>
-          <div class="step-subtitle">"핵심 지표를 한눈에"</div>
-        </div>
-        <div class="step-time">⏱️ 10분</div>
-      </div>
-      <div class="step-body">
-
-        <div class="prompt-section">
-          <div class="prompt-label">📋 AI에게 보낼 프롬프트</div>
-          <div class="prompt-box" id="prompt2">첫 번째 탭 "부재료실적 모니터링"에 내용을 추가해줘.
-
-            맨 위에 숫자 카드 4개를 가로로 나란히 배치해줘:
-            1. 연간 목표: 272.5만 톤 (설명: 2024년 연간 계획 합계)
-            2. 누계 실적: 281.5만 톤 (옆에 "초과" 표시를 오렌지색으로)
-            3. 계획 대비 달성률: 103.3% (옆에 "초과" 표시)
-            4. 거래처 평균 성과율: 90.4%
-
-            카드는 흰색 배경에 둥근 모서리, 큰 숫자는 굵고 크게, 설명은 작은 회색 글씨로 해줘.<button class="copy-btn"
-              onclick="copyPrompt('prompt2')">복사</button></div>
-        </div>
-
-        <div class="check-section">
-          <h4>✅ 확인 체크리스트</h4>
-          <div class="check-item">4개 카드가 가로로 나란히 보이나요?</div>
-          <div class="check-item">숫자가 크고 눈에 잘 들어오나요?</div>
-        </div>
-
-        <div class="teacher-tip">
-          <h4>💬 강사 한마디</h4>
-          <p>이런 숫자 카드를 <strong>"KPI 카드"</strong>라고 합니다. 대시보드에서 가장 중요한 요소예요. 경영진이 한눈에 현황을 파악할 수 있게 해줍니다.</p>
-        </div>
-
-      </div>
-    </div>
-
-
-    <!-- ═══════════════════════════════════════ -->
-    <!-- STEP 3 -->
-    <!-- ═══════════════════════════════════════ -->
-    <div class="step-card">
-      <div class="step-header">
-        <div class="step-number">3</div>
-        <div class="step-title-area">
-          <h2>차트 넣기</h2>
-          <div class="step-subtitle">"숫자를 그림으로"</div>
-        </div>
-        <div class="step-time">⏱️ 15분</div>
-      </div>
-      <div class="step-body">
-
-        <div class="prompt-section">
-          <div class="prompt-label">📋 AI에게 보낼 프롬프트</div>
-          <div class="prompt-box" id="prompt3">KPI 카드 아래에 차트 2개를 나란히 넣어줘.
-            차트는 Chart.js 라이브러리를 CDN으로 불러와서 사용해줘.
-
-            왼쪽 차트 (너비 60%): "월별 계획 대비 실적"
-            - 막대 차트
-            - 가로축: 1월~12월
-            - 주황색 막대: 실적 (만톤 단위로 표시)
-            - 파란색 테두리 막대: 계획
-            - 제목 옆에 "12월 누계 103.3%" 표시
-
-            아래 샘플 데이터를 사용해줘:
-            계획(만톤): 21.5, 21.5, 22.5, 24.5, 24.5, 25.0, 24.0, 20.0, 20.5, 20.0, 25.0, 23.5
-            실적(만톤): 23.9, 20.6, 22.9, 21.4, 22.6, 25.6, 27.1, 24.7, 22.5, 25.2, 23.1, 21.8
-
-            오른쪽 차트 (너비 40%): "월별 주요 거래처 납품 추이"
-            - 꺾은선 차트
-            - 거래처 3개: 일보앤틱(파란색), 대한강철(주황색), 동국자원(초록색)
-            - 적당한 샘플 데이터를 넣어줘
-
-            화면이 좁아지면 차트가 위아래로 배치되게 해줘.<button class="copy-btn" onclick="copyPrompt('prompt3')">복사</button></div>
-        </div>
-
-        <div class="check-section">
-          <h4>✅ 확인 체크리스트</h4>
-          <div class="check-item">막대 차트에서 주황(실적)과 파란(계획)이 구분되나요?</div>
-          <div class="check-item">꺾은선 차트에 3개 거래처가 각각 다른 색으로 보이나요?</div>
-        </div>
-
-        <div class="teacher-tip">
-          <h4>💬 강사 한마디</h4>
-          <p><strong>Chart.js</strong>는 인터넷에서 무료로 가져와 쓸 수 있는 차트 도구입니다. <strong>CDN</strong>이라는 방식으로 인터넷 주소 한 줄이면 사용
-            가능해요. AI가 알아서 연결해줬습니다.</p>
-        </div>
-
-      </div>
-    </div>
-
-
-    <!-- ═══════════════════════════════════════ -->
-    <!-- STEP 4 -->
-    <!-- ═══════════════════════════════════════ -->
-    <div class="step-card" style="border: 2px solid var(--orange);">
-      <div class="step-header" style="background: linear-gradient(135deg, var(--orange) 0%, #D35400 100%);">
-        <div class="step-number" style="background: var(--navy);">4</div>
-        <div class="step-title-area">
-          <h2>엑셀 데이터 붙여넣기 ⭐</h2>
-          <div class="step-subtitle">"진짜 우리 데이터로!" — 오늘의 하이라이트</div>
-        </div>
-        <div class="step-time">⏱️ 20분</div>
-      </div>
-      <div class="step-body">
-
-        <div class="prompt-section">
-          <div class="prompt-label">📋 AI에게 보낼 프롬프트</div>
-          <div class="prompt-box" id="prompt4">차트 아래에 "월별 계획 대비 실적 데이터" 영역을 추가해줘.
-
-            이 영역의 핵심 기능:
-            엑셀에서 데이터를 복사해서 붙여넣으면, 위의 차트와 KPI 숫자가 자동으로 바뀌는 기능이야.
-
-            구체적으로 이렇게 만들어줘:
-            1. "붙여넣은 값 적용" 버튼과 "저장" 버튼을 만들어줘
-            2. 버튼을 누르면 큰 텍스트 입력창(textarea)이 나타나게 해줘
-            3. 사용자가 엑셀에서 아래 형태의 데이터를 복사해서 붙여넣어:
-            4줄짜리 데이터 (탭으로 구분됨)
-            1줄: 인천 계획 숫자 12개 (1월~12월)
-            2줄: 인천 실적 숫자 12개
-            3줄: 포항 계획 숫자 12개
-            4줄: 포항 실적 숫자 12개
-            4. "적용" 버튼을 누르면 붙여넣은 텍스트를 줄바꿈과 탭으로 나눠서 숫자로 변환하고, 인천+포항 합계로 차트와 KPI 카드를 자동 갱신해줘
-            5. "저장" 버튼을 누르면 localStorage에 저장해서 새로고침해도 데이터가 유지되게 해줘
-            6. 페이지를 열 때 localStorage에 저장된 데이터가 있으면 자동으로 불러와줘
-
-            아래에 현재 데이터를 테이블로도 보여줘 (인천 계획, 인천 실적, 포항 계획, 포항 실적 4줄)
-
-            그리고 그 아래에 "거래처 납품 실적관리 데이터" 영역도 만들어줘:
-            - 큰 텍스트 입력창에 엑셀 5개 열을 복사해 붙여넣기 (전기일 / 공급업체명 / 검수등급명 / 입고량 / 입고금액)
-            - "원본 데이터 반영" 버튼으로 데이터를 파싱해서 테이블로 표시
-            - "저장" 버튼으로 localStorage에 저장
-            - 데이터가 많으니까 100개씩 페이지 나누기<button class="copy-btn" onclick="copyPrompt('prompt4')">복사</button></div>
-        </div>
-
-        <div class="data-section">
-          <div class="data-label">📊 테스트용 데이터 (복사해서 붙여넣기)</div>
-          <div class="data-box" id="testdata1">120000 120000 125000 140000 140000 140000 135000 115000 115000 140000
-            140000 140000
-            127063 112223 121629 119461 118783 148765 159953 142029 124798 141347 124439 133081
-            95000 95000 100000 105000 105000 110000 105000 85000 90000 60000 110000 95000
-            111756 94104 107552 94741 107083 107615 110992 104927 100542 111148 106371 84476<button class="copy-btn"
-              onclick="copyData('testdata1')">복사</button></div>
-        </div>
-
-        <div class="check-section">
-          <h4>✅ 확인 체크리스트</h4>
-          <div class="check-item">텍스트 입력창에 위 숫자를 붙여넣고 적용하면 차트가 바뀌나요?</div>
-          <div class="check-item">새로고침해도 데이터가 유지되나요?</div>
-        </div>
-
-        <div class="teacher-tip">
-          <h4>💬 강사 한마디</h4>
-          <p><strong>localStorage</strong>는 브라우저 안의 <strong>개인 서랍장</strong> 같은 거예요. 서버 없이도 데이터를 저장할 수 있습니다. 실무에서 간단한 도구를
-            만들 때 아주 유용합니다.</p>
-        </div>
-
-      </div>
-    </div>
-
-
-    <!-- ═══════════════════════════════════════ -->
-    <!-- STEP 5 -->
-    <!-- ═══════════════════════════════════════ -->
-    <div class="step-card">
-      <div class="step-header">
-        <div class="step-number">5</div>
-        <div class="step-title-area">
-          <h2>나머지 탭 채우기</h2>
-          <div class="step-subtitle">"기능을 하나씩 추가"</div>
-        </div>
-        <div class="step-time">⏱️ 20분</div>
-      </div>
-      <div class="step-body">
-
-        <!-- 5-A: 거래처 관리 -->
-        <div class="prompt-section">
-          <div class="prompt-label">📋 프롬프트 A — 거래처 관리 탭</div>
-          <div class="prompt-box" id="prompt5a">세 번째 탭 "거래처 관리"에 내용을 추가해줘.
-
-            상단에 KPI 카드 4개:
-            1. 등록 거래처: 8개사
-            2. 월 공급능력 합계: 11.5만
-            3. 금년 납품량 합계: 26.5만
-            4. 대표 거래처: 현대스크랩
-
-            아래에 거래처 목록 테이블을 만들어줘:
-            코드 | 거래처명 | 지역 | 대표자 | 연락처 | 월공급능력(톤) | 금년납품량(톤) | 신뢰등급 | 납품실적 | 관리
-
-            샘플 데이터 8개를 넣어줘.
-            신뢰등급은 A, B+, B 같은 형태로, 납품실적은 프로그레스바로 표시해줘.
-            관리 컬럼에 "수정", "삭제" 버튼을 넣어줘.
-
-            "+ 거래처 등록" 버튼을 만들고, 클릭하면 입력 폼이 팝업으로 뜨게 해줘.
-            등록/수정/삭제 모두 localStorage에 저장해줘.<button class="copy-btn" onclick="copyPrompt('prompt5a')">복사</button></div>
-        </div>
-
-        <!-- 5-B: 공지사항 -->
-        <div class="sub-prompt">
-          <div class="prompt-section">
-            <div class="prompt-label">📋 프롬프트 B — 공지사항 탭</div>
-            <div class="prompt-box" id="prompt5b">네 번째 탭 "공지사항"에 내용을 추가해줘.
-
-              왼쪽 절반: 공지사항 게시판
-              - 표: 구분(필독/일반) | 제목 | 작성자 | 작성일
-              - 샘플 공지 5~6개 넣어줘 (철스크랩 수급계획 관련 내용으로)
-              - "+ 등록" 버튼을 누르면 공지 작성 팝업이 뜨게 해줘
-
-              오른쪽 절반: 팀 일정관리
-              - 이번 달 캘린더 (달력 모양)
-              - "이전/다음" 버튼으로 월 이동
-              - "+ 일정 등록" 버튼
-              - 날짜 클릭하면 일정 추가할 수 있게
-
-              모두 localStorage에 저장해줘.<button class="copy-btn" onclick="copyPrompt('prompt5b')">복사</button></div>
+    <!-- Left: Secretary -->
+    <aside class="secretary-card">
+      <div class="secretary-profile animate-in">
+        <div class="secretary-image-wrap">
+          <img src="secretary.png" alt="AI Secretary" />
+          <div class="secretary-image-overlay"></div>
+          <div class="secretary-status">
+            <span class="status-dot"></span>
+            온라인
           </div>
         </div>
-
-        <div class="check-section">
-          <h4>✅ 확인 체크리스트</h4>
-          <div class="check-item">거래처 등록 / 수정 / 삭제가 되나요?</div>
-          <div class="check-item">공지사항 등록이 되나요?</div>
-          <div class="check-item">캘린더가 잘 표시되나요?</div>
-        </div>
-
-      </div>
-    </div>
-
-
-    <!-- ═══════════════════════════════════════ -->
-    <!-- STEP 6 -->
-    <!-- ═══════════════════════════════════════ -->
-    <div class="step-card">
-      <div class="step-header">
-        <div class="step-number">6</div>
-        <div class="step-title-area">
-          <h2>마무리 다듬기</h2>
-          <div class="step-subtitle">"완성도를 높이자"</div>
-        </div>
-        <div class="step-time">⏱️ 15분</div>
-      </div>
-      <div class="step-body">
-
-        <div class="prompt-section">
-          <div class="prompt-label">📋 AI에게 보낼 프롬프트</div>
-          <div class="prompt-box" id="prompt6">아직 안 만든 탭들을 채우고, 전체적으로 다듬어줘.
-
-            1. 두 번째 탭 "등급별현황/수입관리":
-            - KPI 카드 4개 (구매량 총합, 누계 입고금액, 구매량/금액 비율, 국고하+선반설 비율)
-            - 월별 구매량 추이 차트 (막대+꺾은선 복합)
-            - 인천공장 배분 현황 도넛 차트 (등급별: 국고하, 국고중, 선반설, 국고상, 기타)
-            - 월별 구매실적 상세 테이블
-            - 수입 계약/운송 현황 테이블 (상태를 색깔 배지로: 도착=초록, 운송중=주황, 선적=노랑, 계약=회색)
-
-            2. 다섯 번째 탭 "사용자관리":
-            - KPI 카드 4개 (전체/활성/관리자/비활성 사용자 수)
-            - 사용자 목록 테이블 + 등록 기능
-
-            3. 전체 다듬기:
-            - 헤더에 "보고서 내보내기" 오렌지색 버튼 추가
-            - 다크모드 토글 버튼 추가 (클릭하면 어두운 테마로)
-            - "로그아웃" 버튼 (클릭 시 확인창만 띄우기)
-            - "조회 연도" 드롭다운 (2024, 2025, 2026)
-            - 반응형: 넓은 화면은 가로, 좁은 화면은 세로
-            - 하단 푸터: "Copyright(c) 동국시스템즈"<button class="copy-btn" onclick="copyPrompt('prompt6')">복사</button></div>
-        </div>
-
-        <div class="check-section">
-          <h4>✅ 최종 확인 체크리스트</h4>
-          <div class="check-item">5개 탭 모두 내용이 있나요?</div>
-          <div class="check-item">다크모드 전환이 되나요?</div>
-          <div class="check-item">화면을 줄여도 깨지지 않나요?</div>
-          <div class="check-item">엑셀 데이터 붙여넣기 후 차트가 자동으로 바뀌나요?</div>
-        </div>
-
-      </div>
-    </div>
-
-
-    <!-- ═══════════════════════════════════════ -->
-    <!-- 트러블슈팅 -->
-    <!-- ═══════════════════════════════════════ -->
-    <div class="section-divider">잘 안 될 때</div>
-
-    <div class="trouble-section">
-      <h2>🔥 문제 해결 프롬프트 모음</h2>
-
-      <div class="trouble-item">
-        <h4>😵 화면에 아무것도 안 나와요</h4>
-        <div class="trouble-prompt" id="fix1">에러가 나요. 화면에 아무것도 안 보여요. 코드를 확인해서 고쳐줘.<button class="copy-btn"
-            onclick="copyData('fix1')">복사</button></div>
-      </div>
-
-      <div class="trouble-item">
-        <h4>📊 차트가 안 그려져요</h4>
-        <div class="trouble-prompt" id="fix2">차트가 안 그려져요. Chart.js CDN이 제대로 로드되는지 확인하고, 차트 생성 코드에 에러가 없는지 확인해서
-          고쳐줘.<button class="copy-btn" onclick="copyData('fix2')">복사</button></div>
-      </div>
-
-      <div class="trouble-item">
-        <h4>📋 데이터 붙여넣기가 안 돼요</h4>
-        <div class="trouble-prompt" id="fix3">엑셀에서 복사한 데이터를 붙여넣고 적용 버튼을 눌러도 반응이 없어요. 탭으로 구분된 텍스트를 파싱하는 부분을 확인하고
-          고쳐줘.<button class="copy-btn" onclick="copyData('fix3')">복사</button></div>
-      </div>
-
-      <div class="trouble-item">
-        <h4>🎨 디자인이 이상해요 (겹침/너무 작음)</h4>
-        <div class="trouble-prompt" id="fix4">카드들이 겹쳐 보여요 (또는 차트가 너무 작아요, 글씨가 안 보여요). CSS를 확인해서 레이아웃을 고쳐줘.<button
-            class="copy-btn" onclick="copyData('fix4')">복사</button></div>
-      </div>
-
-      <div class="trouble-item">
-        <h4>💾 저장이 안 돼요 (새로고침하면 사라짐)</h4>
-        <div class="trouble-prompt" id="fix5">저장 버튼을 눌러도 새로고침하면 데이터가 사라져요. localStorage에 저장하고 불러오는 부분을 확인해서 고쳐줘.<button
-            class="copy-btn" onclick="copyData('fix5')">복사</button></div>
-      </div>
-    </div>
-
-
-    <!-- ═══════════════════════════════════════ -->
-    <!-- 보너스 -->
-    <!-- ═══════════════════════════════════════ -->
-    <div class="bonus-section">
-      <h2>⭐ 보너스: 한 방에 전체를 만들고 싶다면?</h2>
-      <p>시간이 부족하거나 단계별 실습이 어려우면, 이 프롬프트 <strong>하나</strong>로 전체를 만들 수 있습니다.</p>
-      <div class="bonus-prompt-box" id="promptBonus">동국제강 원료기획팀용 업무 대시보드를 하나의 HTML 파일로 만들어줘.
-        서버나 데이터베이스 없이, 브라우저만으로 동작해야 해.
-        데이터 저장은 localStorage를 사용해줘.
-        차트는 Chart.js CDN을 사용해줘.
-
-        디자인: 네이비(#1B2A4A) 헤더, 오렌지(#E67E22) 포인트, 밝은 회색(#F4F6F9) 배경
-        상단 헤더에 "DK 동국제강" 로고, 날짜, 조회연도 선택, 팀명, 다크모드 토글, 로그아웃
-
-        5개 탭 메뉴:
-
-        1. 부재료실적 모니터링
-        - KPI 카드 4개 (연간목표 272.5만톤, 누계실적 281.5만톤, 달성률 103.3%, 거래처성과율 90.4%)
-        - 월별 계획 대비 실적 막대차트 (1~12월, 실적=주황, 계획=네이비)
-        - 월별 거래처 납품 추이 꺾은선 차트 (3개 거래처)
-        - 핵심 체크 포인트 카드
-        - 엑셀 데이터 붙여넣기 기능: textarea에 탭 구분 데이터를 붙여넣으면 차트와 KPI 자동 갱신 (인천/포항 계획 실적 4줄 형태)
-        - 거래처 납품 실적 데이터도 엑셀 5개열(전기일/공급업체/검수등급/입고량/입고금액) 붙여넣기 가능
-        - 100건 단위 페이지네이션
-
-        2. 등급별현황/수입관리
-        - KPI 카드 4개
-        - 월별 구매량 추이 복합차트 (막대+꺾은선)
-        - 인천공장 배분 도넛 차트 (등급별)
-        - 수입 계약/운송 현황 테이블 (상태 배지)
-
-        3. 거래처 관리
-        - KPI 카드 4개 + 거래처 목록 테이블 (8개 샘플)
-        - 등록/수정/삭제 기능 (모달 팝업)
-
-        4. 공지사항
-        - 좌측: 공지사항 게시판 (등록 기능)
-        - 우측: 팀 일정관리 캘린더
-
-        5. 사용자관리
-        - 사용자 목록 테이블 + 등록 기능
-
-        모든 데이터는 localStorage에 저장.
-        반응형 디자인 (넓으면 가로, 좁으면 세로).
-        하단 푸터: "Copyright(c) 동국시스템즈"<button class="copy-btn" onclick="copyData('promptBonus')">복사</button></div>
-    </div>
-
-
-    <!-- ═══════════════════════════════════════ -->
-    <!-- 용어 정리 -->
-    <!-- ═══════════════════════════════════════ -->
-    <div class="section-divider">오늘 배운 핵심 정리</div>
-
-    <div class="glossary-section">
-      <h2>📖 용어 사전</h2>
-      <div class="glossary-grid">
-        <div class="glossary-item">
-          <div class="glossary-term">바이브코딩</div>
-          <div class="glossary-def">AI에게 말로 설명해서 코드를 만드는 방식</div>
-        </div>
-        <div class="glossary-item">
-          <div class="glossary-term">HTML</div>
-          <div class="glossary-def">웹 페이지의 뼈대 (구조를 잡아줌)</div>
-        </div>
-        <div class="glossary-item">
-          <div class="glossary-term">CSS</div>
-          <div class="glossary-def">웹 페이지의 옷 (색상, 크기, 배치)</div>
-        </div>
-        <div class="glossary-item">
-          <div class="glossary-term">JavaScript</div>
-          <div class="glossary-def">웹 페이지의 두뇌 (클릭, 계산, 반응)</div>
-        </div>
-        <div class="glossary-item">
-          <div class="glossary-term">localStorage</div>
-          <div class="glossary-def">브라우저 안의 개인 서랍장 (데이터 저장소)</div>
-        </div>
-        <div class="glossary-item">
-          <div class="glossary-term">Chart.js</div>
-          <div class="glossary-def">차트(그래프)를 자동으로 그려주는 무료 도구</div>
-        </div>
-        <div class="glossary-item">
-          <div class="glossary-term">CDN</div>
-          <div class="glossary-def">인터넷에서 도구를 빌려오는 방식 (주소 한 줄이면 OK)</div>
-        </div>
-        <div class="glossary-item">
-          <div class="glossary-term">CRUD</div>
-          <div class="glossary-def">만들기(Create) · 보기(Read) · 수정(Update) · 삭제(Delete)</div>
-        </div>
-        <div class="glossary-item">
-          <div class="glossary-term">프롬프트</div>
-          <div class="glossary-def">AI에게 보내는 요청/지시 문장</div>
-        </div>
-        <div class="glossary-item">
-          <div class="glossary-term">반응형</div>
-          <div class="glossary-def">화면 크기에 맞춰 자동으로 바뀌는 디자인</div>
+        <div class="secretary-info">
+          <div class="secretary-name">김하은 비서</div>
+          <div class="secretary-role">AI Executive Assistant</div>
         </div>
       </div>
-    </div>
 
-  </div><!-- /content -->
+      <div class="speech-bubble animate-in delay-2" id="speechBubble">
+        <div class="speech-greeting" id="speechGreeting">안녕하세요, 팀장님!</div>
+        <div class="speech-text" id="speechText">
+          <div class="speech-typing"><span></span><span></span><span></span></div>
+        </div>
+      </div>
+    </aside>
 
-  <footer class="main-footer">
-    동국제강 원료기획팀 바이브코딩 워크숍
+    <!-- Right: Dashboard -->
+    <section class="right-panel">
+
+      <!-- Summary Cards -->
+      <div class="summary-row animate-in delay-1">
+        <div class="summary-card schedule">
+          <div class="summary-label">오늘 일정</div>
+          <div class="summary-value">7</div>
+          <div class="summary-detail">시간 지정 일정</div>
+        </div>
+        <div class="summary-card email">
+          <div class="summary-label">읽지 않은 이메일</div>
+          <div class="summary-value">10</div>
+          <div class="summary-detail">중요 2건 포함</div>
+        </div>
+        <div class="summary-card todo">
+          <div class="summary-label">종일 할 일</div>
+          <div class="summary-value">4</div>
+          <div class="summary-detail">리마인더 항목</div>
+        </div>
+      </div>
+
+      <!-- Schedule Timeline -->
+      <div class="animate-in delay-2">
+        <div class="section-header">
+          <div class="section-title">
+            <span class="icon" style="background: var(--accent-soft);">&#x1f4c5;</span>
+            오늘의 일정
+          </div>
+          <span class="section-badge">2026년 4월 1일 수요일</span>
+        </div>
+
+        <div class="timeline">
+          <!-- All Day Events -->
+          <div class="timeline-allday">
+            <div class="allday-label">종일 일정</div>
+            <div class="allday-items">
+              <span class="allday-chip">&#x1f4f1; 선택약정 확인 (SKT)</span>
+              <span class="allday-chip">&#x1f3e2; CMC 내방</span>
+              <span class="allday-chip">&#x1f4b0; 지환이 용돈 50만원</span>
+              <span class="allday-chip">&#x1f4de; KT 요금제 변경</span>
+            </div>
+          </div>
+
+          <!-- Timed Events -->
+          <div class="timeline-body" id="timelineBody">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Important Emails -->
+      <div class="animate-in delay-3">
+        <div class="section-header">
+          <div class="section-title">
+            <span class="icon" style="background: var(--orange-soft);">&#x2709;</span>
+            주요 이메일
+          </div>
+          <span class="section-badge">최근 수신</span>
+        </div>
+
+        <div class="email-list" id="emailList">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <footer class="footer">
+    AI Secretary v1.0 &middot; Google Calendar & Gmail 연동 &middot; Built with Claude Code
   </footer>
 
   <script>
-    function copyPrompt(id) {
-      const el = document.getElementById(id);
-      // Get text content excluding the button text
-      const btn = el.querySelector('.copy-btn');
-      const text = el.textContent.replace(btn ? btn.textContent : '', '').trim();
-      navigator.clipboard.writeText(text).then(() => {
-        const b = el.querySelector('.copy-btn');
-        if (b) {
-          const orig = b.textContent;
-          b.textContent = '✓ 복사됨!';
-          b.style.background = 'rgba(16,185,129,0.3)';
-          b.style.color = '#6EE7B7';
-          setTimeout(() => {
-            b.textContent = orig;
-            b.style.background = '';
-            b.style.color = '';
-          }, 1500);
-        }
-      });
+    // ====== DATA ======
+    const scheduleEvents = [
+      { time: '08:00', end: '09:00', title: '포항 출장 전표', duration: '1시간' },
+      { time: '09:00', end: '10:00', title: '컴퓨터 셋팅', duration: '1시간' },
+      { time: '10:00', end: '11:00', title: '방세', duration: '1시간' },
+      { time: '11:30', end: '12:30', title: '검사증명서 프로그램 분석', duration: '1시간' },
+      { time: '13:00', end: '14:00', title: '품질보증서 프로그램 분석', duration: '1시간' },
+      { time: '14:30', end: '15:30', title: '주간업무 작성', duration: '1시간' },
+      { time: '16:00', end: '17:00', title: '나만의 비서 만들기', duration: '1시간' },
+    ];
+
+    const emails = [
+      {
+        icon: 'important',
+        emoji: '&#x1f6a8;',
+        sender: 'Supabase',
+        subject: 'Security vulnerabilities detected in your projects',
+        snippet: '프로젝트에서 보안 취약점이 감지되었습니다. 확인이 필요합니다.',
+        time: '3/31 21:22',
+        priority: 'high',
+        priorityLabel: '중요'
+      },
+      {
+        icon: 'security',
+        emoji: '&#x1f512;',
+        sender: 'Google 보안팀',
+        subject: '보안 알림 - Claude for Gmail 액세스 허용',
+        snippet: '일부 Google 계정 데이터에 대한 액세스를 허용하셨습니다',
+        time: '3/31 12:46',
+        priority: 'medium',
+        priorityLabel: '보안'
+      },
+      {
+        icon: 'tech',
+        emoji: '&#x1f680;',
+        sender: 'Dan at Vercel',
+        subject: 'Building agents with the right stack',
+        snippet: 'Reducing the setup tax on agents - 에이전트 구축 가이드',
+        time: '3/30 21:50',
+        priority: null,
+        priorityLabel: null
+      },
+      {
+        icon: 'security',
+        emoji: '&#x1f512;',
+        sender: 'Google 보안팀',
+        subject: '보안 알림 - 새 패스키 추가됨',
+        snippet: '계정에 새 패스키가 추가되었습니다. 본인이 아니라면 확인하세요.',
+        time: '3/30 09:28',
+        priority: 'medium',
+        priorityLabel: '보안'
+      },
+    ];
+
+    // ====== CLOCK ======
+    function updateClock() {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2, '0');
+      const m = String(now.getMinutes()).padStart(2, '0');
+      const s = String(now.getSeconds()).padStart(2, '0');
+      document.getElementById('currentTime').textContent = `${h}:${m}:${s}`;
+
+      const days = ['일', '월', '화', '수', '목', '금', '토'];
+      const dateStr = `${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일 ${days[now.getDay()]}요일`;
+      document.getElementById('currentDate').textContent = dateStr;
     }
-    function copyData(id) {
-      const el = document.getElementById(id);
-      const btn = el.querySelector('.copy-btn');
-      const text = el.textContent.replace(btn ? btn.textContent : '', '').trim();
-      navigator.clipboard.writeText(text).then(() => {
-        if (btn) {
-          const orig = btn.textContent;
-          btn.textContent = '✓ 복사됨!';
-          setTimeout(() => { btn.textContent = orig; }, 1500);
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    // ====== TIMELINE ======
+    function renderTimeline() {
+      const now = new Date();
+      const currentMinutes = now.getHours() * 60 + now.getMinutes();
+      const body = document.getElementById('timelineBody');
+
+      body.innerHTML = scheduleEvents.map((evt, i) => {
+        const [sh, sm] = evt.time.split(':').map(Number);
+        const [eh, em] = evt.end.split(':').map(Number);
+        const startMin = sh * 60 + sm;
+        const endMin = eh * 60 + em;
+
+        let status = '';
+        let badge = '';
+        if (currentMinutes >= startMin && currentMinutes < endMin) {
+          status = 'current';
+          badge = '<span class="current-badge">진행 중</span>';
+        } else if (currentMinutes >= endMin) {
+          status = 'past';
         }
-      });
+
+        const isLast = i === scheduleEvents.length - 1;
+
+        return `
+          <div class="timeline-item ${status}">
+            <div class="timeline-time">${evt.time}</div>
+            <div class="timeline-dot-line">
+              <div class="timeline-dot"></div>
+              ${!isLast ? '<div class="timeline-line"></div>' : ''}
+            </div>
+            <div class="timeline-content">
+              <div class="timeline-title">${evt.title}${badge}</div>
+              <div class="timeline-duration">${evt.time} - ${evt.end} (${evt.duration})</div>
+            </div>
+          </div>
+        `;
+      }).join('');
     }
+    renderTimeline();
+    setInterval(renderTimeline, 60000);
+
+    // ====== EMAILS ======
+    function renderEmails() {
+      const list = document.getElementById('emailList');
+      list.innerHTML = emails.map(e => {
+        const priorityHtml = e.priority
+          ? `<span class="email-priority priority-${e.priority}">${e.priorityLabel}</span>`
+          : '';
+        return `
+          <div class="email-card">
+            <div class="email-icon ${e.icon}">${e.emoji}</div>
+            <div style="min-width:0">
+              <div class="email-sender">${e.sender}</div>
+              <div class="email-subject">${e.subject}</div>
+              <div class="email-snippet">${e.snippet}</div>
+            </div>
+            <div style="text-align:right">
+              <div class="email-time">${e.time}</div>
+              ${priorityHtml}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+    renderEmails();
+
+    // ====== SECRETARY BRIEFING ======
+    function generateBriefing() {
+      const now = new Date();
+      const hour = now.getHours();
+      const currentMinutes = hour * 60 + now.getMinutes();
+
+      let greeting = '';
+      if (hour < 9) greeting = '좋은 아침입니다, 팀장님!';
+      else if (hour < 12) greeting = '안녕하세요, 팀장님!';
+      else if (hour < 14) greeting = '점심 식사는 하셨나요, 팀장님?';
+      else if (hour < 18) greeting = '오후도 힘내세요, 팀장님!';
+      else greeting = '오늘 하루도 수고 많으셨습니다, 팀장님!';
+
+      document.getElementById('speechGreeting').textContent = greeting;
+
+      // Find next event
+      let nextEvent = null;
+      let currentEvent = null;
+      for (const evt of scheduleEvents) {
+        const [sh, sm] = evt.time.split(':').map(Number);
+        const [eh, em] = evt.end.split(':').map(Number);
+        const startMin = sh * 60 + sm;
+        const endMin = eh * 60 + em;
+        if (currentMinutes >= startMin && currentMinutes < endMin) {
+          currentEvent = evt;
+        } else if (currentMinutes < startMin && !nextEvent) {
+          nextEvent = evt;
+        }
+      }
+
+      // Count remaining events
+      const remaining = scheduleEvents.filter(evt => {
+        const [eh, em] = evt.end.split(':').map(Number);
+        return currentMinutes < eh * 60 + em;
+      }).length;
+
+      let briefing = '';
+
+      if (currentEvent) {
+        briefing += `지금은 <strong>${currentEvent.title}</strong> 시간입니다. `;
+        if (nextEvent) {
+          const [nh] = nextEvent.time.split(':').map(Number);
+          const [nm] = nextEvent.time.split(':').map(Number);
+          briefing += `다음 일정은 <strong>${nextEvent.time}</strong>에 <strong>${nextEvent.title}</strong>이 예정되어 있습니다. `;
+        }
+      } else if (nextEvent) {
+        const [sh, sm] = nextEvent.time.split(':').map(Number);
+        const diff = (sh * 60 + sm) - currentMinutes;
+        if (diff <= 30) {
+          briefing += `<strong>${diff}분 후</strong> <strong>${nextEvent.title}</strong>이 시작됩니다. 준비해주세요! `;
+        } else {
+          briefing += `다음 일정은 <strong>${nextEvent.time}</strong>에 <strong>${nextEvent.title}</strong>입니다. `;
+        }
+      } else {
+        briefing += '오늘 남은 일정이 모두 완료되었습니다! ';
+      }
+
+      briefing += `오늘 총 <strong>${scheduleEvents.length}개</strong> 시간 일정 중 <strong>${remaining}개</strong>가 남아있고, `;
+      briefing += `종일 할 일이 <strong>4건</strong> 있습니다.<br><br>`;
+      briefing += `&#x1f4e7; <strong>Supabase 보안 알림</strong>이 도착해 있으니 확인 부탁드립니다. `;
+      briefing += `Google 보안 알림도 <strong>2건</strong> 있습니다.`;
+
+      // Typewriter effect
+      const textEl = document.getElementById('speechText');
+      textEl.innerHTML = '';
+      let i = 0;
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = briefing;
+      const plainText = tempDiv.textContent;
+
+      function typeChar() {
+        if (i <= briefing.length) {
+          // Find the safe HTML insertion point
+          textEl.innerHTML = briefing.substring(0, findHtmlIndex(briefing, i));
+          i += 2;
+          setTimeout(typeChar, 15);
+        }
+      }
+
+      // Simple approach: just show it with a fade
+      textEl.style.opacity = '0';
+      textEl.innerHTML = briefing;
+      textEl.style.transition = 'opacity 0.8s ease';
+      setTimeout(() => { textEl.style.opacity = '1'; }, 300);
+    }
+
+    // Run briefing after a short delay for effect
+    setTimeout(generateBriefing, 1200);
+
+    // Update briefing every 5 minutes
+    setInterval(generateBriefing, 300000);
+
+    // ====== THEME TOGGLE ======
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      const next = current === 'light' ? 'dark' : 'light';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    }
+
+    // Load saved theme
+    (function() {
+      const saved = localStorage.getItem('theme');
+      if (saved) {
+        document.documentElement.setAttribute('data-theme', saved);
+      }
+    })();
+
+    // ====== VOICE SYNTHESIS ======
+    let isSpeaking = false;
+    let speechSynth = window.speechSynthesis;
+
+    function getBriefingText() {
+      const now = new Date();
+      const hour = now.getHours();
+      const currentMinutes = hour * 60 + now.getMinutes();
+
+      let greeting = '';
+      if (hour < 9) greeting = '좋은 아침입니다, 팀장님!';
+      else if (hour < 12) greeting = '안녕하세요, 팀장님!';
+      else if (hour < 14) greeting = '점심 식사는 하셨나요, 팀장님?';
+      else if (hour < 18) greeting = '오후도 힘내세요, 팀장님!';
+      else greeting = '오늘 하루도 수고 많으셨습니다, 팀장님!';
+
+      let nextEvent = null;
+      let currentEvent = null;
+      for (const evt of scheduleEvents) {
+        const [sh, sm] = evt.time.split(':').map(Number);
+        const [eh, em] = evt.end.split(':').map(Number);
+        const startMin = sh * 60 + sm;
+        const endMin = eh * 60 + em;
+        if (currentMinutes >= startMin && currentMinutes < endMin) {
+          currentEvent = evt;
+        } else if (currentMinutes < startMin && !nextEvent) {
+          nextEvent = evt;
+        }
+      }
+
+      const remaining = scheduleEvents.filter(evt => {
+        const [eh, em] = evt.end.split(':').map(Number);
+        return currentMinutes < eh * 60 + em;
+      }).length;
+
+      let text = greeting + ' ';
+
+      if (currentEvent) {
+        text += `지금은 ${currentEvent.title} 시간입니다. `;
+        if (nextEvent) {
+          text += `다음 일정은 ${nextEvent.time}에 ${nextEvent.title}이 예정되어 있습니다. `;
+        }
+      } else if (nextEvent) {
+        const [sh, sm] = nextEvent.time.split(':').map(Number);
+        const diff = (sh * 60 + sm) - currentMinutes;
+        if (diff <= 30) {
+          text += `${diff}분 후 ${nextEvent.title}이 시작됩니다. 준비해주세요! `;
+        } else {
+          text += `다음 일정은 ${nextEvent.time}에 ${nextEvent.title}입니다. `;
+        }
+      } else {
+        text += '오늘 남은 일정이 모두 완료되었습니다! ';
+      }
+
+      text += `오늘 총 ${scheduleEvents.length}개 시간 일정 중 ${remaining}개가 남아있고, 종일 할 일이 4건 있습니다. `;
+      text += `수파베이스 보안 알림이 도착해 있으니 확인 부탁드립니다. 구글 보안 알림도 2건 있습니다.`;
+
+      return text;
+    }
+
+    function toggleVoice() {
+      const btn = document.getElementById('voiceBtn');
+      const icon = document.getElementById('voiceIcon');
+      const label = document.getElementById('voiceLabel');
+
+      if (isSpeaking) {
+        speechSynth.cancel();
+        isSpeaking = false;
+        btn.classList.remove('speaking');
+        icon.innerHTML = '&#x1f50a;';
+        label.textContent = '음성 브리핑';
+        return;
+      }
+
+      const text = getBriefingText();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'ko-KR';
+      utterance.rate = 0.95;
+      utterance.pitch = 1.15;
+
+      // Try to find a Korean female voice
+      const voices = speechSynth.getVoices();
+      const koreanFemale = voices.find(v =>
+        v.lang.startsWith('ko') && v.name.toLowerCase().includes('female')
+      ) || voices.find(v =>
+        v.lang.startsWith('ko') && (v.name.includes('Yuna') || v.name.includes('Heami') || v.name.includes('SunHi') || v.name.includes('Heera'))
+      ) || voices.find(v => v.lang.startsWith('ko'));
+
+      if (koreanFemale) {
+        utterance.voice = koreanFemale;
+      }
+
+      utterance.onstart = () => {
+        isSpeaking = true;
+        btn.classList.add('speaking');
+        icon.innerHTML = '&#x23f9;';
+        label.textContent = '중지';
+      };
+
+      utterance.onend = () => {
+        isSpeaking = false;
+        btn.classList.remove('speaking');
+        icon.innerHTML = '&#x1f50a;';
+        label.textContent = '음성 브리핑';
+      };
+
+      utterance.onerror = () => {
+        isSpeaking = false;
+        btn.classList.remove('speaking');
+        icon.innerHTML = '&#x1f50a;';
+        label.textContent = '음성 브리핑';
+      };
+
+      speechSynth.speak(utterance);
+    }
+
+    // Preload voices (some browsers load them async)
+    if (speechSynth.onvoiceschanged !== undefined) {
+      speechSynth.onvoiceschanged = () => {};
+    }
+    speechSynth.getVoices();
   </script>
-
 </body>
-
 </html>
