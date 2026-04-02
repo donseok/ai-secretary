@@ -178,7 +178,7 @@ export default function Secretary() {
       <header style={{ position: "sticky", top: 0, zIndex: 50, background: "var(--bg-elevated)", borderBottom: "1px solid var(--border)", boxShadow: "var(--shadow-sm)" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 40px", height: 64, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-            <div style={{ width: 40, height: 40, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, background: "linear-gradient(135deg, var(--accent), #a78bfa)" }}>📋</div>
+            <div style={{ width: 40, height: 40, borderRadius: 12, overflow: "hidden", position: "relative" }}><Image src="/lovely.png" alt="AI Secretary" fill style={{ objectFit: "cover" }} /></div>
             <div>
               <div style={{ fontSize: 16, fontWeight: 700, letterSpacing: "-0.3px" }}>AI Secretary</div>
               <div style={{ fontSize: 10, letterSpacing: 1.5, fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase" }}>Personal Briefing</div>
