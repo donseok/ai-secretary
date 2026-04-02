@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { getTimeGreeting, getTodayStr, addDays, formatDateKR } from "@/lib/data";
 import type { ScheduleEvent, AllDayEvent } from "@/lib/data";
@@ -21,6 +22,7 @@ interface ChatMessage { role: "user" | "assistant"; content: string; }
 interface Weather { temp: number | null; tempMax?: number; tempMin?: number; humidity?: number; wind?: number; description: string; icon: string; city: string; }
 
 export default function Secretary() {
+  const router = useRouter();
   const [theme, setTheme] = useState<"dark" | "light">("light");
   const [time, setTime] = useState("");
   const [selectedDate, setSelectedDate] = useState(getTodayStr());
@@ -196,6 +198,7 @@ export default function Secretary() {
               <span style={{ position: "absolute", left: 6, top: "50%", transform: "translateY(-50%)", fontSize: 11, opacity: theme === "light" ? 1 : 0, transition: "opacity 0.3s" }}>☀️</span>
               <span style={{ position: "absolute", right: 4, top: "50%", transform: "translateY(-50%)", fontSize: 11, opacity: theme === "dark" ? 1 : 0, transition: "opacity 0.3s" }}>🌙</span>
             </button>
+            <button onClick={async () => { await fetch("/api/auth/logout", { method: "POST" }); router.push("/login"); }} style={{ height: 28, padding: "0 12px", borderRadius: 8, border: "1px solid var(--border)", background: "var(--surface-3)", color: "var(--text-muted)", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>로그아웃</button>
             <div className="hidden md:block" style={{ textAlign: "right", marginLeft: 8 }}>
               <div style={{ fontSize: 20, fontWeight: 300, letterSpacing: 2, fontVariantNumeric: "tabular-nums", lineHeight: 1 }}>{time}</div>
               <div style={{ fontSize: 10, marginTop: 4, fontWeight: 600, color: "var(--text-muted)" }}>{date}</div>
