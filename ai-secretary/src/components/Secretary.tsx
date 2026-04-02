@@ -127,7 +127,7 @@ export default function Secretary() {
       setBriefing(t);
     }
     gen(); const id = setInterval(gen, 300000); return () => clearInterval(id);
-  }, [todaySchedule, todayAllDay]);
+  }, [todaySchedule, todayAllDay, emails]);
 
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [chatMessages]);
   useEffect(() => { if (chatOpen) inputRef.current?.focus(); }, [chatOpen]);
@@ -337,7 +337,7 @@ export default function Secretary() {
               {daySchedule.length > 0 ? daySchedule.map((evt, i) => {
                 const st = isToday ? getStatus(evt) : "future";
                 return (
-                  <div key={evt.time} style={{ display: "grid", gridTemplateColumns: "60px 20px 1fr", gap: 12, padding: "16px 28px", alignItems: "start", background: st === "current" ? "var(--accent-soft)" : "transparent", opacity: st === "past" ? 0.35 : 1, transition: "all 0.2s" }}>
+                  <div key={`${evt.time}-${i}`} style={{ display: "grid", gridTemplateColumns: "60px 20px 1fr", gap: 12, padding: "16px 28px", alignItems: "start", background: st === "current" ? "var(--accent-soft)" : "transparent", opacity: st === "past" ? 0.35 : 1, transition: "all 0.2s" }}>
                     <div style={{ fontSize: 13, fontWeight: 700, fontVariantNumeric: "tabular-nums", textAlign: "right", paddingTop: 1, color: st === "current" ? "var(--accent)" : "var(--text)" }}>{evt.time}</div>
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 4 }}>
                       <div style={{ width: 12, height: 12, borderRadius: "50%", border: "2px solid", flexShrink: 0, background: st === "current" ? "var(--accent)" : "var(--surface-3)", borderColor: st === "current" ? "var(--accent)" : "var(--border-light)", boxShadow: st === "current" ? "0 0 12px rgba(123,147,255,0.5)" : "none" }} />
@@ -376,8 +376,11 @@ export default function Secretary() {
               <span style={{ fontSize: 11, padding: "5px 12px", borderRadius: 8, fontWeight: 700, color: "var(--text-muted)", background: "var(--surface-3)" }}>최근 수신</span>
             </div>
             <div>
+              {emails.length === 0 && (
+                <div style={{ padding: "40px 28px", textAlign: "center", color: "var(--text-muted)", fontSize: 13 }}>메일 로딩 중...</div>
+              )}
               {emails.map((e, i) => (
-                <div key={e.subject} style={{ display: "flex", alignItems: "start", gap: 16, padding: "24px 28px", borderBottom: i < emails.length - 1 ? "1px solid var(--border)" : "none", cursor: "pointer", transition: "all 0.2s" }}>
+                <div key={e.id || e.subject} style={{ display: "flex", alignItems: "start", gap: 16, padding: "24px 28px", borderBottom: i < emails.length - 1 ? "1px solid var(--border)" : "none", cursor: "pointer", transition: "all 0.2s" }}>
                   <div style={{ width: 46, height: 46, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0, background: e.type === "important" ? "var(--red-soft)" : e.type === "security" ? "var(--orange-soft)" : "var(--accent-soft)" }}>
                     {e.emoji}
                   </div>

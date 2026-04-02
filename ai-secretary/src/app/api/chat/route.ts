@@ -1,7 +1,9 @@
 import { streamText } from "ai";
 import { google } from "@ai-sdk/google";
-import { emails, getTodayStr } from "@/lib/data";
+import { getTodayStr } from "@/lib/data";
+import { emails as fallbackEmails } from "@/lib/data";
 import { fetchCalendarEvents } from "@/lib/google-calendar";
+import { fetchEmails } from "@/lib/gmail";
 import type { ScheduleEvent, AllDayEvent } from "@/lib/data";
 
 const SYSTEM_PROMPT = `당신은 "김하은"이라는 이름의 AI 비서입니다.
@@ -28,16 +30,24 @@ async function getLiveScheduleContext(): Promise<{
   context: string;
   timed: ScheduleEvent[];
   allDay: AllDayEvent[];
+  emailList: { sender: string; subject: string; priority: string | null; priorityLabel: string | null }[];
 }> {
   const todayStr = getTodayStr();
   let timed: ScheduleEvent[] = [];
   let allDay: AllDayEvent[] = [];
+  let emailList: { sender: string; subject: string; priority: string | null; priorityLabel: string | null }[] = fallbackEmails;
 
   try {
-    const gcal = await fetchCalendarEvents(todayStr);
+    const [gcal, gmailEmails] = await Promise.all([
+      fetchCalendarEvents(todayStr).catch(() => null),
+      fetchEmails(10).catch(() => null),
+    ]);
     if (gcal) {
       timed = gcal.timed;
       allDay = gcal.allDay;
+    }
+    if (gmailEmails) {
+      emailList = gmailEmails;
     }
   } catch {
     // fallback: import from data
@@ -71,16 +81,17 @@ ${next ? `다음 일정: ${next}` : "남은 일정 없음"}
 남은 일정: ${remaining}개
 
 주요 이메일:
-${emails.map(e => `- [${e.priorityLabel || "일반"}] ${e.sender}: ${e.subject}`).join("\n")}
+${emailList.map(e => `- [${e.priorityLabel || "일반"}] ${e.sender}: ${e.subject}`).join("\n")}
 `;
 
-  return { context, timed, allDay };
+  return { context, timed, allDay, emailList };
 }
 
 function getRuleBasedReply(
   query: string,
   timed: ScheduleEvent[],
-  allDay: AllDayEvent[]
+  allDay: AllDayEvent[],
+  emailList: { sender: string; subject: string; priority: string | null; priorityLabel: string | null }[]
 ): string {
   const q = query.toLowerCase();
   const now = new Date();
@@ -126,8 +137,8 @@ function getRuleBasedReply(
     return `팀장님, 오늘 빈 시간입니다:\n\n${gaps.join("\n")}`;
   }
   if (q.includes("이메일") || q.includes("메일")) {
-    let r = `읽지 않은 주요 이메일 ${emails.length}건입니다:\n\n`;
-    emails.forEach((e) => {
+    let r = `읽지 않은 주요 이메일 ${emailList.length}건입니다:\n\n`;
+    emailList.forEach((e) => {
       r += `${e.priority === "high" ? "🔴" : e.priority === "medium" ? "🟡" : "⚪"} ${e.sender}: ${e.subject}\n`;
     });
     return r;
@@ -147,7 +158,7 @@ function getRuleBasedReply(
 
 export async function POST(req: Request) {
   const body = await req.json();
-  const { context, timed, allDay } = await getLiveScheduleContext();
+  const { context, timed, allDay, emailList } = await getLiveScheduleContext();
 
   // AI mode with Gemini
   if (process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
@@ -165,6 +176,6 @@ export async function POST(req: Request) {
 
   // Fallback: rule-based
   const userMessage = body.messages?.at(-1)?.content || body.message || "";
-  const reply = getRuleBasedReply(userMessage, timed, allDay);
+  const reply = getRuleBasedReply(userMessage, timed, allDay, emailList);
   return Response.json({ reply });
 }
