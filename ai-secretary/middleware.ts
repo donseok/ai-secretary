@@ -6,8 +6,12 @@ const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "fallback-secr
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // Allow auth API routes and login page
-  if (pathname.startsWith("/api/auth") || pathname === "/login") {
+  // Allow auth API routes, login page, and static files
+  if (
+    pathname.startsWith("/api/auth") ||
+    pathname === "/login" ||
+    pathname.match(/\.(png|jpg|jpeg|gif|svg|ico|webp)$/)
+  ) {
     return NextResponse.next();
   }
 
