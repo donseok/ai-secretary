@@ -126,13 +126,14 @@ export function getTimeGreeting(): string {
 
 export function formatDateKR(dateStr: string): string {
   const d = new Date(dateStr + "T00:00:00+09:00");
+  const kst = new Date(d.getTime() + 9 * 60 * 60 * 1000);
   const days = ["일", "월", "화", "수", "목", "금", "토"];
-  return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일 ${days[d.getDay()]}요일`;
+  return `${kst.getUTCFullYear()}년 ${kst.getUTCMonth() + 1}월 ${kst.getUTCDate()}일 ${days[kst.getUTCDay()]}요일`;
 }
 
 export function getTodayStr(): string {
-  const n = new Date();
-  return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, "0")}-${String(n.getDate()).padStart(2, "0")}`;
+  const n = new Date(Date.now() + 9 * 60 * 60 * 1000);
+  return `${n.getUTCFullYear()}-${String(n.getUTCMonth() + 1).padStart(2, "0")}-${String(n.getUTCDate()).padStart(2, "0")}`;
 }
 
 export function addDays(dateStr: string, days: number): string {

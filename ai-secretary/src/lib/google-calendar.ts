@@ -52,9 +52,11 @@ export async function fetchCalendarEvents(dateStr: string): Promise<{
       const diffMin = Math.round((end.getTime() - start.getTime()) / 60000);
       const durStr = diffMin >= 60 ? `${Math.floor(diffMin / 60)}시간${diffMin % 60 ? ` ${diffMin % 60}분` : ""}` : `${diffMin}분`;
 
+      const startKST = toKST(start);
+      const endKST = toKST(end);
       timed.push({
-        time: pad(start.getHours()) + ":" + pad(start.getMinutes()),
-        end: pad(end.getHours()) + ":" + pad(end.getMinutes()),
+        time: pad(startKST.hours) + ":" + pad(startKST.minutes),
+        end: pad(endKST.hours) + ":" + pad(endKST.minutes),
         title: evt.summary || "(제목 없음)",
         duration: durStr,
       });
@@ -62,6 +64,11 @@ export async function fetchCalendarEvents(dateStr: string): Promise<{
   }
 
   return { timed, allDay };
+}
+
+function toKST(date: Date) {
+  const kst = new Date(date.getTime() + 9 * 60 * 60 * 1000);
+  return { hours: kst.getUTCHours(), minutes: kst.getUTCMinutes() };
 }
 
 function pad(n: number) {
