@@ -72,49 +72,6 @@ export function getScheduleForDate(dateStr: string): DaySchedule {
 export const scheduleEvents = calendarData["2026-04-01"].timed;
 export const allDayEvents = calendarData["2026-04-01"].allDay;
 
-export const emails = [
-  {
-    type: "important" as const,
-    emoji: "🚨",
-    sender: "Supabase",
-    subject: "Security vulnerabilities detected in your projects",
-    snippet: "프로젝트에서 보안 취약점이 감지되었습니다. 확인이 필요합니다.",
-    time: "3/31 21:22",
-    priority: "high" as const,
-    priorityLabel: "중요",
-  },
-  {
-    type: "security" as const,
-    emoji: "🔒",
-    sender: "Google 보안팀",
-    subject: "보안 알림 - Claude for Gmail 액세스 허용",
-    snippet: "일부 Google 계정 데이터에 대한 액세스를 허용하셨습니다",
-    time: "3/31 12:46",
-    priority: "medium" as const,
-    priorityLabel: "보안",
-  },
-  {
-    type: "tech" as const,
-    emoji: "🚀",
-    sender: "Dan at Vercel",
-    subject: "Building agents with the right stack",
-    snippet: "Reducing the setup tax on agents - 에이전트 구축 가이드",
-    time: "3/30 21:50",
-    priority: null,
-    priorityLabel: null,
-  },
-  {
-    type: "security" as const,
-    emoji: "🔒",
-    sender: "Google 보안팀",
-    subject: "보안 알림 - 새 패스키 추가됨",
-    snippet: "계정에 새 패스키가 추가되었습니다. 본인이 아니라면 확인하세요.",
-    time: "3/30 09:28",
-    priority: "medium" as const,
-    priorityLabel: "보안",
-  },
-];
-
 export function getTimeGreeting(): string {
   const hour = new Date().getHours();
   if (hour < 9) return "좋은 아침입니다, 팀장님!";
@@ -167,8 +124,5 @@ export function getCurrentScheduleContext(): string {
 ${current ? `현재 진행중: ${current}` : "현재 진행중인 일정 없음"}
 ${next ? `다음 일정: ${next}` : "남은 일정 없음"}
 남은 일정: ${remaining}개
-
-주요 이메일:
-${emails.map(e => `- [${e.priorityLabel || "일반"}] ${e.sender}: ${e.subject}`).join("\n")}
 `;
 }

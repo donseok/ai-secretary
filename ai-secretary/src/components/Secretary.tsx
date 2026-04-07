@@ -5,18 +5,11 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { getTimeGreeting, getTodayStr, addDays, formatDateKR } from "@/lib/data";
 import type { ScheduleEvent, AllDayEvent } from "@/lib/data";
-
-interface EmailItem {
-  id?: string;
-  type: "important" | "security" | "tech" | "general";
-  emoji: string;
-  sender: string;
-  subject: string;
-  snippet: string;
-  time: string;
-  priority: "high" | "medium" | null;
-  priorityLabel: string | null;
-}
+import TodoList, { getTodoStats } from "./TodoList";
+import NewsFeed from "./NewsFeed";
+import PomodoroTimer from "./PomodoroTimer";
+import StickyNotes from "./StickyNotes";
+import WeeklyStats from "./WeeklyStats";
 
 interface ChatMessage { role: "user" | "assistant"; content: string; }
 interface Weather { temp: number | null; tempMax?: number; tempMin?: number; humidity?: number; wind?: number; description: string; icon: string; city: string; }
@@ -39,8 +32,7 @@ export default function Secretary() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatLoading, setChatLoading] = useState(false);
   const [weather, setWeather] = useState<Weather | null>(null);
-  const [emails, setEmails] = useState<EmailItem[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
+  const [todoIncomplete, setTodoIncomplete] = useState(0);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -57,11 +49,16 @@ export default function Secretary() {
   useEffect(() => { localStorage.removeItem("theme"); }, []);
   useEffect(() => { document.documentElement.setAttribute("data-theme", theme); localStorage.setItem("theme", theme); }, [theme]);
   useEffect(() => { fetch("/api/weather").then(r => r.json()).then(setWeather).catch(() => {}); }, []);
+
+  // Poll todo stats for summary card
   useEffect(() => {
-    fetch("/api/emails").then(r => r.json()).then(d => {
-      setEmails(d.emails || []);
-      setUnreadCount(d.unreadCount || 0);
-    }).catch(() => {});
+    function updateTodoStats() {
+      const stats = getTodoStats();
+      setTodoIncomplete(stats.total - stats.done);
+    }
+    updateTodoStats();
+    const id = setInterval(updateTodoStats, 3000);
+    return () => clearInterval(id);
   }, []);
 
   // Fetch schedule from API
@@ -121,15 +118,13 @@ export default function Secretary() {
       else if (nxt) { const [sh, sm] = nxt.time.split(":").map(Number), diff = sh * 60 + sm - cm; t += diff <= 30 ? `<strong>${diff}분 후</strong> <strong>${nxt.title}</strong>이 시작됩니다!` : `다음 일정은 <strong>${nxt.time}</strong>에 <strong>${nxt.title}</strong>입니다. `; }
       else t += "오늘 남은 일정이 모두 완료되었습니다! 🎉 ";
       t += `<br/>오늘 <strong>${todaySchedule.length}개</strong> 시간 일정 중 <strong>${rem}개</strong> 남음, 종일 할 일 <strong>${todayAllDay.length}건</strong>.`;
-      const importantEmails = emails.filter(e => e.priority === "high");
-      const securityEmails = emails.filter(e => e.type === "security");
-      if (importantEmails.length > 0) t += ` 📧 <strong>${importantEmails[0].sender} ${importantEmails[0].subject.slice(0, 20)}</strong> 확인 필요`;
-      if (securityEmails.length > 0) t += `, Google 보안 <strong>${securityEmails.length}건</strong>.`;
-      else t += ".";
+      const todoStats = getTodoStats();
+      const pending = todoStats.total - todoStats.done;
+      if (pending > 0) t += ` 체크리스트 미완료 <strong>${pending}건</strong> 남아있습니다.`;
       setBriefing(t);
     }
     gen(); const id = setInterval(gen, 300000); return () => clearInterval(id);
-  }, [todaySchedule, todayAllDay, emails]);
+  }, [todaySchedule, todayAllDay]);
 
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [chatMessages]);
   useEffect(() => { if (chatOpen) inputRef.current?.focus(); }, [chatOpen]);
@@ -272,8 +267,8 @@ export default function Secretary() {
           {[
             { icon: "📅", label: "시간 일정", value: daySchedule.length, unit: "건", color: "var(--accent)", bg: "var(--accent-soft)" },
             { icon: "📌", label: "종일 할 일", value: dayAllDay.length, unit: "건", color: "var(--green)", bg: "var(--green-soft)" },
-            { icon: "📧", label: "안 읽은 메일", value: unreadCount, unit: "통", color: "var(--orange)", bg: "var(--orange-soft)" },
-            { icon: "🚨", label: "중요 알림", value: emails.filter(e => e.priority === "high" || e.priority === "medium").length, unit: "건", color: "var(--red)", bg: "var(--red-soft)" },
+            { icon: "✅", label: "할 일 현황", value: todoIncomplete, unit: "건 남음", color: "var(--orange)", bg: "var(--orange-soft)" },
+            { icon: "🚨", label: "중요 알림", value: daySchedule.length > 0 ? 1 : 0, unit: "건", color: "var(--red)", bg: "var(--red-soft)" },
           ].map(c => (
             <div key={c.label} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 20, padding: "28px 24px", boxShadow: "var(--shadow)", transition: "transform 0.2s", cursor: "default" }}>
               <div style={{ width: 44, height: 44, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, background: c.bg, marginBottom: 16 }}>{c.icon}</div>
@@ -286,8 +281,8 @@ export default function Secretary() {
           ))}
         </section>
 
-        {/* ─── SCHEDULE + EMAILS (2 columns) ─── */}
-        <section style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginBottom: 32 }} className="content-grid">
+        {/* ─── ROW 1: SCHEDULE + TODO (2 columns) ─── */}
+        <section style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginBottom: 24 }} className="content-grid">
           {/* Schedule */}
           <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 20, boxShadow: "var(--shadow)", overflow: "hidden" }}>
             {/* Header with date nav */}
@@ -369,43 +364,20 @@ export default function Secretary() {
             </div>
           </div>
 
-          {/* Emails */}
-          <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 20, boxShadow: "var(--shadow)", overflow: "hidden" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "22px 28px", borderBottom: "1px solid var(--border)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <span style={{ width: 38, height: 38, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, background: "var(--orange-soft)" }}>✉️</span>
-                <span style={{ fontSize: 16, fontWeight: 800, letterSpacing: "-0.3px" }}>주요 이메일</span>
-              </div>
-              <span style={{ fontSize: 11, padding: "5px 12px", borderRadius: 8, fontWeight: 700, color: "var(--text-muted)", background: "var(--surface-3)" }}>최근 수신</span>
-            </div>
-            <div>
-              {emails.length === 0 && (
-                <div style={{ padding: "40px 28px", textAlign: "center", color: "var(--text-muted)", fontSize: 13 }}>메일 로딩 중...</div>
-              )}
-              {emails.map((e, i) => (
-                <div key={e.id || e.subject} style={{ display: "flex", alignItems: "start", gap: 16, padding: "24px 28px", borderBottom: i < emails.length - 1 ? "1px solid var(--border)" : "none", cursor: "pointer", transition: "all 0.2s" }}>
-                  <div style={{ width: 46, height: 46, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0, background: e.type === "important" ? "var(--red-soft)" : e.type === "security" ? "var(--orange-soft)" : "var(--accent-soft)" }}>
-                    {e.emoji}
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 4 }}>
-                      <span style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)" }}>{e.sender}</span>
-                      <span style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)", flexShrink: 0 }}>{e.time}</span>
-                    </div>
-                    <div style={{ fontSize: 14, fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", lineHeight: 1.4, marginBottom: 6 }}>{e.subject}</div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <span style={{ fontSize: 12, color: "var(--text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>{e.snippet}</span>
-                      {e.priority && (
-                        <span style={{ fontSize: 10, padding: "3px 8px", borderRadius: 6, fontWeight: 800, flexShrink: 0, background: e.priority === "high" ? "var(--red-soft)" : "var(--orange-soft)", color: e.priority === "high" ? "var(--red)" : "var(--orange)" }}>
-                          {e.priorityLabel}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          {/* Todo List */}
+          <TodoList />
+        </section>
+
+        {/* ─── ROW 2: NEWS + STICKY NOTES (2 columns) ─── */}
+        <section style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginBottom: 24 }} className="content-grid">
+          <NewsFeed />
+          <StickyNotes />
+        </section>
+
+        {/* ─── ROW 3: POMODORO + WEEKLY STATS (2 columns) ─── */}
+        <section style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginBottom: 32 }} className="content-grid">
+          <PomodoroTimer />
+          <WeeklyStats />
         </section>
       </div>
 
@@ -431,9 +403,9 @@ export default function Secretary() {
               <div style={{ textAlign: "center", padding: "48px 0" }}>
                 <div style={{ fontSize: 48, marginBottom: 16 }}>👋</div>
                 <div style={{ fontSize: 15, fontWeight: 800, marginBottom: 4 }}>안녕하세요! 김하은 비서입니다.</div>
-                <div style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 24 }}>일정, 이메일, 빈 시간 등을 물어보세요</div>
+                <div style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 24 }}>일정, 빈 시간 등을 물어보세요</div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center" }}>
-                  {["오늘 일정 알려줘", "다음 일정은?", "빈 시간 있어?", "이메일 확인"].map(q => (
+                  {["오늘 일정 알려줘", "다음 일정은?", "빈 시간 있어?"].map(q => (
                     <button key={q} onClick={() => { setChatInput(q); setTimeout(() => document.getElementById("chatForm")?.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })), 50); }} style={{ fontSize: 12, padding: "8px 16px", borderRadius: 20, border: "1px solid var(--border)", fontWeight: 600, cursor: "pointer", color: "var(--text-secondary)", background: "var(--surface-2)", fontFamily: "inherit", transition: "all 0.2s" }}>{q}</button>
                   ))}
                 </div>
@@ -456,7 +428,7 @@ export default function Secretary() {
       )}
 
       <footer style={{ textAlign: "center", padding: "40px 0", fontSize: 11, fontWeight: 600, color: "var(--text-muted)" }}>
-        AI Secretary v3.0 · Google Calendar · Gmail · 부산 날씨 · Built with Next.js + Claude Code
+        AI Secretary v3.0 · Google Calendar · 부산 날씨 · Built with Next.js + Claude Code
       </footer>
 
       {/* Responsive overrides */}
